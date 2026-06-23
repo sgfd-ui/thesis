@@ -196,29 +196,30 @@ pre{background:#f7f7f7;padding:12px;overflow:auto}
 <p>这里并不表示执行前已经生成完整的可接管微任务集合。第 6 章只生成初始路由、热点拆分参数、初始任务归属和可描述边界；快照刷新条件、供给节点选择、微任务大小、RDMA 原子领取和进度协议都属于第 7 章。二者的接口关系是：第 6 章生成初始任务及其边界，初始任务执行后形成真实剩余工作，第 7 章再根据剩余负载快照进行动态微任务划分和接管。</p>
 <h2>7 快照驱动的剩余工作再平衡算法</h2>
 <h3>7.1 问题与设计选择</h3>
-<p>第 7 章接收的是第 6 章生成的初始任务计划和可描述的剩余任务边界，而不是抽象的热点键集合或预先生成的微任务集合。执行过程中，各节点根据本地领取和完成进度维护剩余工作状态；当快照驱动的剩余工作再平衡触发时，系统从尚未完成的尾部区间中按需划分微批次，并改变这些剩余微批次的执行者。微批次仍对应原始任务计划中的键集合、路由规则或键内拆分范围，因此保持与基础连接执行层一致的连接语义。</p>
-<p>快照驱动的剩余工作再平衡处理的是执行前静态规划无法完全消除的剩余长尾。即使系统已经识别热点并调整任务组织，连接过程中仍可能由于实际输出规模、节点进度或任务代价误差出现少数节点持续持有大量未完成任务的情况。本文将这类未完成任务表示为可远端让渡的尾部区间，并用按需发布的剩余工作快照指导空闲节点选择供给节点。图 4 给出了该算法的核心数据路径和控制路径。</p>
+<p>第 7 章讨论的是执行期剩余工作再平衡。它的输入不是热点键集合，也不是执行前预置的一组可接管微任务，而是任意初始规划阶段生成的初始任务计划、可描述的任务边界以及执行过程中持续维护的本地进度状态。因此，无论前面采用历史复用、残余统计还是完整当前轮识别，只要初始任务能够描述已完成范围和未完成范围，本章机制都可以作为运行时纠偏层接入。</p>
+<p>快照驱动的剩余工作再平衡处理的是初始负载计划之后仍然出现的执行长尾。实际执行中，输出规模误差、节点进度差异、资源扰动或单个任务代价偏差都可能使少数节点长期持有未完成尾部工作。本文将这类尚未被本地领取、也尚未被远端接管的剩余工作表示为可让渡尾部区间；当空闲节点出现时，系统按需形成集群范围可见的剩余工作视图，并从供给节点未完成尾部范围中动态划分微批次。图 4 给出了该算法的核心数据路径和控制路径。</p>
 <figure><img src="file:///C:/Users/18195/Desktop/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%BA%E6%96%87/figures/paper_fig4_rdma.svg" alt="图 4 快照驱动的剩余工作再平衡算法"><figcaption>图 4 快照驱动的剩余工作再平衡算法</figcaption></figure>
-<p>该算法的核心思想是把再平衡拆成两个低开销动作：读一个已发布的负载视图，原子获取一个尾部微批次。本文把已经耗尽本地工作的节点称为请求节点，把仍持有可让渡尾部任务的节点称为供给节点。负载视图给出哪些节点仍有可转移工作、候选目标的相对顺序以及当前发布的候选池规模；原子获取保证同一尾部区间不会被多个节点重复拿走。与周期性中心调度相比，这种设计把控制开销集中在视图更新时，而不是让所有执行节点持续上报状态。</p>
+<p>该算法的核心思想是把再平衡压缩为两个低开销动作：读取一个按需发布的剩余工作快照，原子领取一个供给节点的尾部微批次。本文把已经耗尽本地工作的节点称为请求节点，把仍持有可让渡尾部工作的节点称为供给节点。快照只提供候选供给节点、候选顺序和候选确认预算；最终能否领取任务由供给节点实时 <code>QueueState_i</code> 上的 RDMA CAS 决定。与周期性中心调度相比，这种设计不要求所有执行节点持续上报状态，而是在视图失效或请求节点需要帮助时才支付快照发布成本。</p>
 <p>快照驱动的剩余工作再平衡只改变剩余任务的执行者，不改变连接谓词和任务覆盖范围。换言之，某个微批次被远端节点接管后，仍执行同一组 key 或同一段逻辑任务对应的等值连接工作；算法需要保证任务区间之间互斥，且所有尚未完成的任务最终仍被某个节点执行。</p>
 <h3>7.2 可让渡任务表示</h3>
 <p>系统中每个执行节点维护一个本地区间</p>
 <p><span class="math">$$ [Head_i, Tail_i) $$</span></p>
 <p>其中，<span class="math">$Head_i$</span> 表示本地线程已经领取或声明的任务边界，而不是已经完成的任务边界；<span class="math">$Tail_i$</span> 表示当前仍可被远端请求节点获取的尾部边界。因此，<span class="math">$[Head_i,Tail_i)$</span> 表示尚未被本地领取、也尚未被远端接管的可让渡任务区间。这里的区间不是原始记录偏移，而是执行计划生成的逻辑任务编号或 morsel 编号；每个编号对应一段互斥的连接工作。该表示把本地执行和远端让渡分开：本地线程从头部顺序领取，远端请求只从尾部获取微批次。已领取但未完成的本地任务，以及远端 CAS 成功后被接管但未完成的任务，都由 in-flight 状态记录。因此，本地连接线程仍然保持顺序访问模式，远端再平衡只作用于尚未被本地线程触达的尾部区域。借鉴 Wukong 中受限远端任务获取的思路 [27]，本文进一步把远端探测限制在已发布候选窗口内，而不是让所有空闲节点从同一个高负载节点开始竞争。</p>
+<p>这里的微批次是运行时从剩余尾部范围中按需划分出来的接管单位，而不是初始规划阶段预先生成的对象。初始计划只需要提供可定位的任务边界和可单调推进的进度记录；当请求节点成功缩减供给节点的 <span class="math">$Tail_i$</span> 后，被缩减出的区间才成为一个由请求节点执行的远端微批次。</p>
 <p>第 <span class="math">$i$</span> 个节点在任意时刻的剩余工作量定义为</p>
 <p><span class="math">$$ W_i = Tail_i - Head_i. $$</span></p>
-<p>这里的 <span class="math">$W_i$</span> 表示逻辑微任务层面的剩余工作估计。若执行计划已经把 morsel 切分为近似等代价的任务，则可以用 <span class="math">$Tail_i-Head_i$</span> 近似剩余工作量；若不同微任务的代价差异较大，系统应使用任务代价前缀和或估计权重计算 <span class="math">$W_i$</span>，而不是直接使用任务编号差。这个定义影响候选排序和让渡量估计，但不改变任务区间的互斥性。</p>
+<p>这里的 <span class="math">$W_i$</span> 表示逻辑任务编号层面的剩余工作估计。若执行计划已经把 morsel 切分为近似等代价的任务，则可以用 <span class="math">$Tail_i-Head_i$</span> 近似剩余工作量；若不同逻辑任务的代价差异较大，系统应使用任务代价前缀和或估计权重计算 <span class="math">$W_i$</span>，而不是直接使用任务编号差。这个定义影响候选排序和让渡量估计，但不改变任务区间的互斥性。</p>
 <p>为了避免本地消费与远端让渡之间出现区间重叠，本文不把 <span class="math">$Head_i$</span> 和 <span class="math">$Tail_i$</span> 作为两个彼此独立的可见状态。每个节点暴露一个 64-bit 原子队列状态：</p>
 <p><span class="math">$$ QueueState_i = [Head_i \mid Tail_i]. $$</span></p>
 <p>在实现上，<span class="math">$Head_i$</span> 和 <span class="math">$Tail_i$</span> 被打包进同一个原子字。本地线程推进 <span class="math">$Head_i$</span> 时也必须对同一个 <code>QueueState_i</code> 执行 64-bit CAS，而不能使用普通写入；请求节点缩减 <span class="math">$Tail_i$</span> 时同样对该原子状态发起 RDMA CAS。这样，如果本地线程和远端请求节点并发修改同一队列状态，只有一个 CAS 能基于旧状态成功，失败方必须重新读取当前状态并重新计算。任务唯一性由同一个原子状态承担，而不是由供给节点 CPU 参与仲裁。</p>
 <p>本地推进同样需要受尾部边界约束。若本地线程以 <code>local_step</code> 为粒度推进，则新头部应写为</p>
 <p><span class="math">$$ Head_i&#x27; = \min(Head_i + local\_step, Tail_i). $$</span></p>
-<p>本地线程领取任务时先设置本地 active 标记或增加 in-flight 计数，再读取当前 <span class="math">$[Head_i,Tail_i]$</span>，计算上述 <span class="math">$Head_i&#x27;$</span>，并尝试将 <code>QueueState_i</code> 从 <span class="math">$[Head_i,Tail_i]$</span> 原子更新为 <span class="math">$[Head_i&#x27;,Tail_i]$</span>。若 CAS 失败，说明远端请求节点已经缩减 <span class="math">$Tail_i$</span>，或其他本地线程已经推进 <span class="math">$Head_i$</span>，本地线程必须重新读取状态并重新计算；若最终没有领取到任务，则撤销 active 标记或递减 in-flight 计数。若 CAS 成功，任务在执行完成前一直保持 in-flight，完成后再清除标记或递减计数。该约束保证本地线程不会越过已经被远端缩减后的尾部边界，也不会把远端已经让渡出去的尾部任务写回可执行范围。实际实现中，<code>local_step</code> 应对应 morsel 或逻辑微任务粒度，而不是逐行记录粒度；否则频繁推进 <span class="math">$Head_i$</span> 会放大远端 CAS 失败率。</p>
+<p>本地线程领取任务时先设置本地 active 标记或增加 in-flight 计数，再读取当前 <span class="math">$[Head_i,Tail_i]$</span>，计算上述 <span class="math">$Head_i&#x27;$</span>，并尝试将 <code>QueueState_i</code> 从 <span class="math">$[Head_i,Tail_i]$</span> 原子更新为 <span class="math">$[Head_i&#x27;,Tail_i]$</span>。若 CAS 失败，说明远端请求节点已经缩减 <span class="math">$Tail_i$</span>，或其他本地线程已经推进 <span class="math">$Head_i$</span>，本地线程必须重新读取状态并重新计算；若最终没有领取到任务，则撤销 active 标记或递减 in-flight 计数。若 CAS 成功，任务在执行完成前一直保持 in-flight，完成后再清除标记或递减计数。该约束保证本地线程不会越过已经被远端缩减后的尾部边界，也不会把远端已经让渡出去的尾部任务写回可执行范围。实际实现中，<code>local_step</code> 应对应 morsel 或逻辑任务粒度，而不是逐行记录粒度；否则频繁推进 <span class="math">$Head_i$</span> 会放大远端 CAS 失败率。</p>
 <h3>7.3 快照化负载视图</h3>
-<p>为支持运行时全局视图维护，系统在预定义节点上暴露一块 RDMA 注册的全局元数据区（Global Metadata Region, GMR），用于承载控制头、全局负载摘要以及双缓冲快照视图。其中最关键的控制字段是</p>
+<p>为支持运行时集群范围的剩余工作观察，系统在预定义节点上暴露一块 RDMA 注册的全局元数据区（Global Metadata Region, GMR），用于承载控制头、负载摘要以及双缓冲快照视图。这里的快照是某一发布时刻可远端读取的剩余工作视图，不是强一致全局状态，也不表示系统求得了全局最优任务分配。其中最关键的控制字段是</p>
 <p><code>Atomic_Control_Word = [Version | Lock | Leader_ID | Slot | Reserved]</code></p>
-<p>该 64-bit 原子控制字将可见快照纪元、视图发布锁位、快照发布节点标识以及当前可见槽位封装在同一个原子实体中，降低跨字段发布造成不一致视图的风险。除控制字外，GMR 维护 <code>Current_JFI</code>、<code>Active_Bitmap</code>、<code>K_pool</code>、<code>InFlight_Task_Count</code> 或 <code>Active_Execution_Bitmap</code>，以及 <code>Snapshot_Slots[2][N]</code>。这些字段共同描述当前负载是否均衡、哪些节点可能仍有可转移工作、请求节点最多确认多少候选、是否仍存在正在执行或已接管但未完成的微批次，以及应从哪个双缓冲槽读取候选列表。快照发布节点在构建候选列表时只保留 <code>W_i \ge B_min</code> 的活跃节点，因此空闲节点不会进入供给候选集合。</p>
-<p>本文采用按需快照发布算法（On-demand Snapshot Publication, OSP）维护这组控制状态。系统启动时仅初始化各执行节点的 <code>QueueState_i</code>，GMR 保持未发布状态，即 <code>Version=0</code> 且 <code>Slot</code> 无效；全局候选列表、<code>Active_Bitmap</code> 和 <code>K_pool</code> 不做预先初始化。只有当第一个请求节点出现时，OSP 才通过原子控制字获得发布权，扫描全部节点的 <code>QueueState_i</code>，并发布第一版快照。这样，若早期所有节点都在本地执行，系统不会为尚未使用的全局视图支付初始化成本。</p>
+<p>该 64-bit 原子控制字将可见快照纪元、视图发布锁位、快照发布节点标识以及当前可见槽位封装在同一个原子实体中，降低跨字段发布造成不一致视图的风险。除控制字外，GMR 维护 <code>Current_JFI</code>、<code>Active_Bitmap</code>、<code>K_pool</code>、<code>InFlight_Task_Count</code> 或 <code>Active_Execution_Bitmap</code>，以及 <code>Snapshot_Slots[2][N]</code>。这些字段共同描述快照级负载是否集中、哪些节点可能仍有可转移工作、请求节点最多确认多少候选、是否仍存在正在执行或已接管但未完成的微批次，以及应从哪个双缓冲槽读取候选列表。快照发布节点在构建候选列表时只保留 <code>W_i \ge B_min</code> 的活跃节点，因此空闲节点不会进入供给候选集合。</p>
+<p>本文采用按需快照发布算法（On-demand Snapshot Publication, OSP）维护这组控制状态。每个执行节点始终本地维护自己的 <code>QueueState_i</code> 和 in-flight 状态，但系统不会周期性发布全局视图。启动时 GMR 保持未发布状态，即 <code>Version=0</code> 且 <code>Slot</code> 无效；候选列表、<code>Active_Bitmap</code> 和 <code>K_pool</code> 不做预先初始化。只有当第一个请求节点出现时，OSP 才通过原子控制字获得发布权，扫描全部节点的 <code>QueueState_i</code>，并发布第一版快照。这样，若早期所有节点都在本地执行，系统不会为尚未使用的全局视图支付初始化成本。</p>
 <p>表 2 给出了控制面核心字段的语义。</p>
 <table><thead><tr><th>字段</th><th>含义</th><th>作用</th></tr></thead><tbody>
 <tr><td><code>Version</code></td><td>当前可见快照纪元</td><td>只服务于快照发布与等待节点识别新视图，不参与任务获取 CAS</td></tr>
@@ -240,13 +241,13 @@ pre{background:#f7f7f7;padding:12px;overflow:auto}
 <tr><td><code>w_snapshot</code></td><td>快照剩余工作估计</td><td>用于候选排序和首次让渡量计算</td></tr>
 </tbody></table>
 <p>双缓冲发布遵循“先构建不可见视图，再切换可见视图”的顺序。快照发布节点总是在当前不可见的 shadow slot 中写入新快照，仅在快照写入完成并对远端可见后，才通过一次原子控制字更新完成版本推进、标记释放与槽位翻转。这避免了“新版本号与旧快照”或“新版本号与半写快照”同时可见的风险。</p>
-<p>请求节点读取快照时采用双读校验。它先读取 <code>Atomic_Control_Word</code> 得到 <code>(Version, Slot)</code>，再读取对应快照槽，最后再次读取控制字；只有前后两次读取到的 <code>Version</code> 和 <code>Slot</code> 一致时，该快照才被接受。若两次控制字不一致，请求节点丢弃本次读取结果并重新读取新版本快照。该读侧校验避免请求节点在槽位被后续发布覆盖时读到混合视图。</p>
+<p>请求节点读取快照时采用双读校验。它先读取 <code>Atomic_Control_Word</code> 得到 <code>(Version, Slot)</code>，再读取对应快照槽，最后再次读取控制字；只有前后两次读取到的 <code>Version</code> 和 <code>Slot</code> 一致时，该快照才被接受。若两次控制字不一致，请求节点丢弃本次读取结果并重新读取新版本快照。该读侧校验避免请求节点在槽位被后续发布覆盖时读到混合视图。需要强调的是，<code>Version</code> 只服务于快照发布和读取校验，不参与单次任务领取的正确性判断；任务领取是否成功始终由供给节点当前 <code>QueueState_i</code> 的 CAS 决定。</p>
 <h3>7.4 任务切分与候选池控制</h3>
 <p>系统利用 Jain&#x27;s Fairness Index 对全局剩余工作量的离散程度进行紧凑刻画：</p>
 <p><span class="math">$$ JFI = \frac{(\sum_{i=1}^{N} W_i)^2}{N\sum_{i=1}^{N} W_i^2}. $$</span></p>
-<p><span class="math">$JFI$</span> 的取值位于 <span class="math">$[\frac{1}{N},1]$</span> 之间，值越接近 1，说明全局剩余工作量越均衡；值越接近 <span class="math">$\frac{1}{N}$</span>，说明剩余工作更集中于少数热点节点。本文将 JFI 视为快照级摘要，而不是并发请求者数量或最优让渡比例的推导起点。实际任务让渡采用半分式裁剪规则：</p>
+<p><span class="math">$JFI$</span> 的取值位于 <span class="math">$[\frac{1}{N},1]$</span> 之间，值越接近 1，说明快照中的剩余工作量越均衡；值越接近 <span class="math">$\frac{1}{N}$</span>，说明剩余工作更集中于少数节点。本文将 JFI 视为快照级失衡摘要，而不是并发请求者数量或最优让渡比例的推导起点。实际任务让渡采用半分式裁剪规则：</p>
 <p><span class="math">$$ C_{transfer} = \min\bigl(W_{rem}, \max(B_{min}, \min(\lceil W_{rem}/2 \rceil, B_{max}))\bigr). $$</span></p>
-<p>其中，若 <span class="math">$W_{rem}&lt;B_{min}$</span>，请求节点直接认为该候选已经进入不可让渡范围。这样做的目的，是把公式责任限制在“给出一个保守的单次让渡量”，而不是让 JFI 承担并发请求节点数或单次最优让渡比例的推导。</p>
+<p>其中，若 <span class="math">$W_{rem}&lt;B_{min}$</span>，请求节点直接认为该候选已经进入不可让渡范围。这样做的目的，是把公式责任限制在“给出一个保守的单次让渡量”，而不是让 JFI 承担并发请求节点数或单次最优让渡比例的推导。真正的互斥性仍由后续针对实时 <code>QueueState_i</code> 的 CAS 提供。</p>
 <p>在此基础上，快照发布节点在每次视图构建时依据活跃供给节点数量生成候选池规模</p>
 <p><span class="math">$$ K_{pool} = \min(active\_provider\_count, \lceil \log_2 N \rceil), $$</span></p>
 <p>并将该控制量随当前快照一起发布到 GMR。<code>active_provider_count</code> 表示当前快照中满足 <span class="math">$W_i \ge B_{min}$</span> 的供给节点数量，<span class="math">$\lceil \log_2 N\rceil$</span> 是控制最坏探测开销的保守上界。JFI 仍作为快照级失衡摘要，用于解释剩余工作是否集中，但不直接决定候选池规模。本文中的 <code>K_pool</code> 表示当前视图下允许被逐一确认的高负载候选个数；对同一个供给节点的有限重试不消耗新的候选预算。请求节点只使用已发布的 <code>K_pool</code>，不在本地重算。</p>
@@ -256,7 +257,7 @@ pre{background:#f7f7f7;padding:12px;overflow:auto}
 <p>为了避免多个空闲节点同时从同一个高负载节点开始竞争，请求节点根据 <code>requester_id</code> 与当前 <code>Version</code> 生成受限探测顺序：</p>
 <p><span class="math">$$ ProbeOrder = rotate(candidates, hash(requester\_id, Version) \bmod K_{eff}). $$</span></p>
 <p>该顺序只改变候选访问起点，不改变快照中候选的全局排序。换言之，请求节点仍在快照发布节点发布的高负载候选集合内寻找供给节点，但不同请求节点的首个探测目标会自然分散。</p>
-<p>对每个候选供给节点，请求节点先解包 <code>queue_state_snapshot</code>，得到快照时刻的 <span class="math">$(Head_i,Tail_i)$</span> 和 <span class="math">$W_{rem}$</span>。若 <span class="math">$W_{rem}&lt;B_{min}$</span>，该候选直接被判为不可让渡；否则请求节点采用半分式裁剪规则得到 <span class="math">$C_{transfer}$</span>，并对供给节点暴露的 <code>QueueState_i</code> 发起 RDMA CAS：</p>
+<p>对每个候选供给节点，请求节点先解包 <code>queue_state_snapshot</code>，得到快照时刻的 <span class="math">$(Head_i,Tail_i)$</span> 和 <span class="math">$W_{rem}$</span>。若 <span class="math">$W_{rem}&lt;B_{min}$</span>，该候选直接被判为不可让渡；否则请求节点采用半分式裁剪规则得到 <span class="math">$C_{transfer}$</span>，并对供给节点暴露的实时 <code>QueueState_i</code> 发起 RDMA CAS：</p>
 <p><span class="math">$$ Expected = [Head_i \mid Tail_i], $$</span></p>
 <p><span class="math">$$ Swap = [Head_i \mid (Tail_i - C_{transfer})]. $$</span></p>
 <p>请求节点在尝试接管前，先设置本地 active 标记或增加 in-flight 计数。若 CAS 成功，请求节点获得区间 <span class="math">$[Tail_i-C_{transfer},Tail_i)$</span>，并把该微批次安装为本地工作。被接管的微批次不再作为新的供给区间对外发布，而是由请求节点本地执行；该 active 标记或 in-flight 计数保持到接管微批次执行完成后再清除。若 CAS 失败且请求节点没有获得任务，则撤销 active 标记或递减 in-flight 计数。若 CAS 失败但供给节点仍有可转移任务，请求节点不立即切换到下一个候选，而是利用 CAS 返回的当前 <code>QueueState_i</code> 解包新的 <span class="math">$(Head_i,Tail_i)$</span>。如果新的 <span class="math">$Tail_i-Head_i&lt;B_{min}$</span>，说明该候选已不足以提供有效微批次，请求节点确认其不可让渡并转向下一个候选；如果新的 <span class="math">$Tail_i-Head_i \ge B_{min}$</span>，说明该供给节点仍有可转移任务，请求节点基于返回状态重新计算 <span class="math">$C_{transfer}$</span>，并在有限重试预算 <code>R_retry</code> 内继续尝试同一候选。超过重试预算后，请求节点撤销本次未成功接管对应的 active 标记，并转向自己的下一个候选，以避免围绕单个热点节点长期空转。该先占位、后尝试的规则最多让终止判断更保守，不会在供给节点 <code>QueueState_i</code> 已缩减但接管任务尚未完成时发布错误空视图。</p>
@@ -272,8 +273,8 @@ pre{background:#f7f7f7;padding:12px;overflow:auto}
 </tbody></table>
 <p>没有获得发布权的节点不重复构建快照，而是对 <code>Atomic_Control_Word</code> 做带退避的 RDMA READ。它们只有在同时观察到 <code>Lock=0</code> 且 <code>Version</code> 高于本地快照版本时，才认为新视图已经发布并重新读取快照。若长时间观察到 <code>Lock=1</code> 且版本不推进，节点先根据 <code>Leader_ID</code> 对当前发布节点做生存探测；只有确认对方不可响应后，才通过接管 CAS 替换 <code>Leader_ID</code>。<code>Exit CAS</code> 的期望状态必须同时包含 <code>Version=V</code>、<code>Lock=1</code>、<code>Leader_ID=MyID</code> 和 <code>Slot=S</code>；因此，一旦发布权被接管，短暂停顿后恢复的旧发布节点无法发布已经失效的 shadow slot。接管路径属于容错扩展，核心算法只依赖正常的 <code>Entry CAS</code> 与 <code>Exit CAS</code>。若实现允许发布节点在停顿后继续写入 shadow slot，则还需要为 shadow slot 增加发布 epoch 或 fencing 标记，避免旧发布节点的迟到写污染新发布节点构建的快照。</p>
 <h3>7.7 正确性与开销边界</h3>
-<p>上述算法依赖五个性质保证可用性。第一，任务区间不会重复让渡，也不会与本地顺序消费重叠。<code>QueueState_i</code> 只描述未领取、未接管的可让渡区间；本地线程推进头部和请求节点缩减尾部都通过同一个 <code>QueueState_i</code> 的 CAS 完成，只要其中任一侧先修改成功，另一侧基于旧状态的 CAS 就会失败并重新读取状态。第二，任务覆盖范围不因让渡而改变。远端接管只移动逻辑任务区间的执行者，不改变该区间对应的 join key、输入片段或输出语义。第三，旧快照不会绕过实时队列状态。请求节点最终能否获得任务仍由供给节点当前 <code>QueueState_i</code> 的 CAS 决定。第四，视图发布不会暴露半写或混合状态。新快照总是在 shadow slot 中构建，只有写入完成后才发布；请求节点通过双读控制字校验确认读取到的快照版本与槽位稳定。容错接管若允许旧发布节点恢复后继续写 shadow slot，还需要额外的 epoch 或 fencing 标记，该路径不作为核心无故障协议的必要前提。第五，全局结束不会由局部探测失败误判。请求节点只能确认当前视图下前 <code>K_eff</code> 个活跃候选不可让渡；只有快照发布节点确认全部 <code>QueueState_i</code> 为空，且不存在本地已领取未完成或已接管未完成任务后发布空视图，系统才认为没有剩余工作。</p>
-<p>从开销看，稳态执行节点不需要持续上报状态；请求节点在任务获取前读取一次快照，并围绕已发布候选进行有限确认；视图重构只在候选集合被消费到不可让渡之后发生。发布阶段的主要代价来自对全部节点 <code>QueueState_i</code> 的并行读取和 shadow slot 写入，等待节点的代价则是对单个控制字的短轮询。这样，控制开销随视图失效程度增加，而不是在所有节点上周期性放大。</p>
+<p>上述算法的正确性来自实时队列状态和快照发布协议的分工。第一，任务区间不会重复让渡，也不会与本地顺序消费重叠。<code>QueueState_i</code> 只描述未领取、未接管的可让渡区间；本地线程推进头部和请求节点缩减尾部都通过同一个 <code>QueueState_i</code> 的 CAS 完成，只要其中任一侧先修改成功，另一侧基于旧状态的 CAS 就会失败并重新读取状态。第二，接管不改变任务覆盖和连接语义。远端接管只移动逻辑任务区间的执行者，不改变该区间对应的 join key、输入片段、路由规则或输出语义；被接管区间在完成前由 in-flight 状态记录，不会重新进入可让渡范围。第三，旧快照不能绕过实时状态。请求节点最终能否获得任务仍由供给节点当前 <code>QueueState_i</code> 的 CAS 决定，过期快照只能导致探测失败或重试。第四，视图发布不会暴露半写或混合状态。新快照总是在 shadow slot 中构建，只有写入完成后才发布；请求节点通过双读控制字校验确认读取到的快照版本与槽位稳定。容错接管若允许旧发布节点恢复后继续写 shadow slot，还需要额外的 epoch 或 fencing 标记，该路径不作为核心无故障协议的必要前提。第五，全局结束不会由局部探测失败误判。请求节点只能确认当前视图下前 <code>K_eff</code> 个活跃候选不可让渡；只有快照发布节点确认全部 <code>QueueState_i</code> 为空，且不存在本地已领取未完成或已接管未完成任务后发布空视图，系统才认为没有剩余工作。</p>
+<p>从开销看，稳态执行节点不需要持续上报状态；请求节点在任务获取前读取一次已发布快照，并围绕已发布候选进行有限确认；视图重构只在快照失效、候选耗尽或尚未存在可用快照时发生。发布阶段的主要代价来自对全部节点 <code>QueueState_i</code> 的并行读取、候选排序与 shadow slot 写入，等待节点的代价是对单个控制字的短轮询。这样，控制开销随视图失效程度增加，而不是在所有节点上周期性放大；同时，快照只负责降低供给节点选择成本，任务唯一领取仍由每个供给节点的实时原子队列状态保证。</p>
 <h2>8 实验评估</h2>
 <p>本节评估本文方法在连接键倾斜的分布式等值连接负载均衡中的性能和边界。实验不把 RDMA 当作一个单独变量反复改变，而是把所有方法放入同一 RDMA 通信成本模型。这样，比较对象是执行前静态规划、热点处理、运行时纠偏和跨轮控制信息复用，而不是 TCP 与 RDMA 协议差异。</p>
 <p>为避免把错误路由误写成性能收益，本文只将通过正确性校验的配置纳入性能比较。校验内容包括输出规模、输出校验和以及按键校验和；若某个方法在同一负载配置下产生不一致结果，则该配置不进入性能结论。</p>
