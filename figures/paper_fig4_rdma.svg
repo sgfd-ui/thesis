@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="900" viewBox="0 0 1800 900">
+  <defs>
+    <style>
+      .bg { fill:#f4f4f4; }
+      .region { fill:none; stroke-width:2.2; stroke-dasharray:10 10; rx:18; ry:18; }
+      .box { stroke:#666; stroke-width:2.6; rx:20; ry:20; }
+      .title { font-family:'Noto Sans CJK SC','Microsoft YaHei','PingFang SC',sans-serif; font-size:26px; font-weight:700; fill:#333; }
+      .boxTitle { font-family:'Noto Sans CJK SC','Microsoft YaHei','PingFang SC',sans-serif; font-size:30px; font-weight:700; fill:#1f1f1f; }
+      .label { font-family:'Noto Sans CJK SC','Microsoft YaHei','PingFang SC',sans-serif; font-size:20px; font-weight:500; fill:#555; }
+      .small { font-family:'Noto Sans CJK SC','Microsoft YaHei','PingFang SC',sans-serif; font-size:18px; font-weight:500; fill:#666; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#333"/>
+    </marker>
+    <marker id="arrowDash" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#666"/>
+    </marker>
+  </defs>
+
+  <rect width="100%" height="100%" class="bg"/>
+
+  <!-- regions -->
+  <rect x="60" y="70" width="1680" height="330" class="region" stroke="#86a6c8"/>
+  <rect x="60" y="450" width="1680" height="360" class="region" stroke="#d4a490"/>
+  <text x="900" y="115" text-anchor="middle" class="title">控制面</text>
+  <text x="900" y="495" text-anchor="middle" class="title">数据面</text>
+
+  <!-- control center -->
+  <rect x="610" y="150" width="580" height="200" class="box" fill="#ffffff"/>
+  <text x="900" y="212" text-anchor="middle" class="boxTitle">控制中心</text>
+  <rect x="690" y="225" width="420" height="46" rx="12" ry="12" fill="#bfd0e3" stroke="#7a7a7a" stroke-width="1.5"/>
+  <rect x="690" y="285" width="420" height="46" rx="12" ry="12" fill="#d8e6d5" stroke="#7a7a7a" stroke-width="1.5"/>
+  <text x="900" y="256" text-anchor="middle" class="label">版本快照管理</text>
+  <text x="900" y="316" text-anchor="middle" class="label">候选节点管理</text>
+
+  <!-- supply node -->
+  <rect x="170" y="560" width="430" height="180" class="box" fill="#f1cfbd"/>
+  <text x="385" y="622" text-anchor="middle" class="boxTitle">供给节点</text>
+  <rect x="240" y="662" width="290" height="30" fill="#ffffff" stroke="#7a7a7a" stroke-width="1.4"/>
+  <rect x="360" y="662" width="170" height="30" fill="#e39f87" stroke="#7a7a7a" stroke-width="1.4"/>
+  <text x="238" y="720" class="small">本地任务</text>
+  <text x="530" y="720" text-anchor="end" class="small">尾部任务</text>
+
+  <!-- idle node -->
+  <rect x="1200" y="560" width="430" height="180" class="box" fill="#d8e6d5"/>
+  <text x="1415" y="622" text-anchor="middle" class="boxTitle">空闲节点</text>
+  <rect x="1280" y="660" width="270" height="32" rx="10" ry="10" fill="#ffffff" stroke="#7a7a7a" stroke-width="1.4"/>
+  <text x="1415" y="683" text-anchor="middle" class="small">接收并执行再平衡任务</text>
+
+  <!-- arrows -->
+  <path d="M 385 560 C 420 450, 560 360, 700 308" fill="none" stroke="#666" stroke-width="3" stroke-dasharray="10 8" marker-end="url(#arrowDash)"/>
+  <text x="520" y="430" class="small">负载状态</text>
+
+  <!-- control center <-> idle node -->
+  <path d="M 1108 245 C 1260 285, 1360 390, 1415 560" fill="none" stroke="#333" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="1280" y="350" class="small">快照读取</text>
+
+  <path d="M 1415 560 C 1380 460, 1280 370, 1110 305" fill="none" stroke="#333" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="1270" y="430" class="small">快照更新</text>
+
+  <!-- idle node to supply node -->
+  <path d="M 1200 650 C 980 760, 760 780, 600 680" fill="none" stroke="#333" stroke-width="3.4" marker-end="url(#arrow)"/>
+  <text x="900" y="805" text-anchor="middle" class="small">RDMA 获取尾部任务</text>
+</svg>

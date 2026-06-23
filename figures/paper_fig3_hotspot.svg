@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2100" height="560" viewBox="0 0 2100 560">
+  <defs>
+    <style>
+      .bg { fill: #f4f4f4; }
+      .box { stroke: #626262; stroke-width: 2.4; rx: 18; ry: 18; }
+      .title { font-family: 'Noto Sans CJK SC','Microsoft YaHei','PingFang SC',sans-serif; font-size: 34px; font-weight: 700; fill: #1f1f1f; }
+      .sub { font-family: 'Noto Sans CJK SC','Microsoft YaHei','PingFang SC',sans-serif; font-size: 20px; font-weight: 500; fill: #4a4a4a; }
+      .small { font-family: 'Noto Sans CJK SC','Microsoft YaHei','PingFang SC',sans-serif; font-size: 18px; font-weight: 500; fill: #555; }
+      .math { font-family: 'Times New Roman','Noto Serif CJK SC',serif; font-size: 20px; fill: #4a4a4a; }
+      .label { font-family: 'Noto Sans CJK SC','Microsoft YaHei','PingFang SC',sans-serif; font-size: 22px; font-weight: 600; fill: #333; }
+      .tiny { font-family: 'Noto Sans CJK SC','Microsoft YaHei','PingFang SC',sans-serif; font-size: 15px; fill: #555; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#333"/>
+    </marker>
+  </defs>
+
+  <rect width="100%" height="100%" class="bg"/>
+
+  <rect x="48" y="135" width="235" height="225" class="box" fill="#ffffff"/>
+  <text x="165.5" y="198" text-anchor="middle" class="title">数据块</text>
+  <rect x="95" y="245" width="36" height="30" fill="#c6d8ea" stroke="#8a8a8a" stroke-width="1.3"/>
+  <rect x="142" y="245" width="36" height="30" fill="#c6d8ea" stroke="#8a8a8a" stroke-width="1.3"/>
+  <rect x="189" y="245" width="36" height="30" fill="#c6d8ea" stroke="#8a8a8a" stroke-width="1.3"/>
+  <rect x="95" y="297" width="36" height="30" fill="#d9ead7" stroke="#8a8a8a" stroke-width="1.3"/>
+  <rect x="142" y="297" width="36" height="30" fill="#d9ead7" stroke="#8a8a8a" stroke-width="1.3"/>
+  <rect x="189" y="297" width="36" height="30" fill="#d9ead7" stroke="#8a8a8a" stroke-width="1.3"/>
+
+  <rect x="388" y="115" width="280" height="265" class="box" fill="#c8daeb"/>
+  <text x="528" y="180" text-anchor="middle" class="title">阈值门控</text>
+  <text x="528" y="219" text-anchor="middle" class="sub">块内聚合频次</text>
+  <path d="M448 255 L608 255 L560 335 L496 335 Z" fill="#ffffff" stroke="#666" stroke-width="3"/>
+  <line x1="496" y1="335" x2="560" y2="335" stroke="#666" stroke-width="3"/>
+  <text x="528" y="363" text-anchor="middle" class="small">gate 准入过滤</text>
+
+  <rect x="778" y="115" width="310" height="265" class="box" fill="#f1cfbd"/>
+  <text x="933" y="178" text-anchor="middle" class="title">候选保留</text>
+  <text x="933" y="216" text-anchor="middle" class="sub">Heavy / Light 两层候选区</text>
+  <circle cx="868" cy="272" r="24" fill="#eea287" stroke="#777" stroke-width="1.5"/>
+  <circle cx="933" cy="272" r="24" fill="#c6d8ea" stroke="#777" stroke-width="1.5"/>
+  <circle cx="998" cy="272" r="24" fill="#d9ead7" stroke="#777" stroke-width="1.5"/>
+  <rect x="855" y="322" width="56" height="38" rx="8" ry="8" fill="#ffffff" stroke="#8a8a8a" stroke-width="1.4"/>
+  <rect x="955" y="322" width="56" height="38" rx="8" ry="8" fill="#ffffff" stroke="#8a8a8a" stroke-width="1.4"/>
+  <text x="883" y="348" text-anchor="middle" class="label">H</text>
+  <text x="983" y="348" text-anchor="middle" class="label">L</text>
+
+  <rect x="1198" y="115" width="300" height="265" class="box" fill="#d9ead7"/>
+  <text x="1348" y="178" text-anchor="middle" class="title">压缩计数</text>
+  <text x="1348" y="216" text-anchor="middle" class="sub">带权重压缩更新</text>
+  <rect x="1250" y="240" width="190" height="105" fill="#ffffff" stroke="#777" stroke-width="1.6"/>
+  <line x1="1250" y1="345" x2="1440" y2="345" stroke="#777" stroke-width="1.6"/>
+  <rect x="1272" y="306" width="18" height="39" fill="#888"/>
+  <rect x="1308" y="284" width="18" height="61" fill="#888"/>
+  <rect x="1344" y="262" width="18" height="83" fill="#888"/>
+  <rect x="1380" y="245" width="18" height="100" fill="#888"/>
+  <text x="1348" y="370" text-anchor="middle" class="tiny">保持热点估计相对顺序</text>
+
+  <rect x="1608" y="115" width="280" height="265" class="box" fill="#f1cfbd"/>
+  <text x="1748" y="178" text-anchor="middle" class="title">头部锁定</text>
+  <text x="1748" y="216" text-anchor="middle" class="sub">减少头部候选抖动</text>
+  <rect x="1680" y="246" width="136" height="28" fill="#eea287" stroke="#777" stroke-width="1.4"/>
+  <rect x="1708" y="292" width="80" height="64" fill="#ffffff" stroke="#777" stroke-width="3"/>
+  <line x1="1694" y1="274" x2="1694" y2="292" stroke="#777" stroke-width="3"/>
+  <line x1="1802" y1="274" x2="1802" y2="292" stroke="#777" stroke-width="3"/>
+
+  <rect x="1970" y="135" width="105" height="225" class="box" fill="#ffffff"/>
+  <text x="2022.5" y="198" text-anchor="middle" class="title">输出</text>
+  <text x="2022.5" y="232" text-anchor="middle" class="small">H<tspan baseline-shift="sub" font-size="13">R</tspan>, H<tspan baseline-shift="sub" font-size="13">S</tspan></text>
+  <rect x="1985" y="252" width="37" height="34" fill="#eea287" stroke="#8a8a8a" stroke-width="1.2"/>
+  <rect x="2029" y="252" width="37" height="34" fill="#f3cfbf" stroke="#8a8a8a" stroke-width="1.2"/>
+  <rect x="1985" y="297" width="37" height="34" fill="#c8daeb" stroke="#8a8a8a" stroke-width="1.2"/>
+  <rect x="2029" y="297" width="37" height="34" fill="#efefef" stroke="#8a8a8a" stroke-width="1.2"/>
+  <text x="2003.5" y="275" text-anchor="middle" class="label">HH</text>
+  <text x="2047.5" y="275" text-anchor="middle" class="label">HC</text>
+  <text x="2003.5" y="320" text-anchor="middle" class="label">CH</text>
+  <text x="2047.5" y="320" text-anchor="middle" class="label">CC</text>
+
+  <line x1="283" y1="247" x2="388" y2="247" stroke="#333" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="668" y1="247" x2="778" y2="247" stroke="#333" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="1088" y1="247" x2="1198" y2="247" stroke="#333" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="1498" y1="247" x2="1608" y2="247" stroke="#333" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="1888" y1="247" x2="1970" y2="247" stroke="#333" stroke-width="3" marker-end="url(#arrow)"/>
+</svg>

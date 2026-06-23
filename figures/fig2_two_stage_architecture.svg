@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360">
+  <defs>
+    <style>
+      text{font-family:"Microsoft YaHei","Source Han Sans SC","SimSun",sans-serif;fill:#222}
+      .box{stroke:#555;stroke-width:1.4;rx:10;ry:10}
+      .arrow{stroke:#333;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .dash{stroke:#555;stroke-width:1.8;fill:none;stroke-dasharray:7 5;marker-end:url(#arrow)}
+      .small{font-size:18px}.label{font-size:22px;font-weight:600}.tiny{font-size:15px;fill:#555}
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L9,3 L0,6 Z" fill="#333"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="360" fill="#fff"/>
+
+  <text x="290" y="42" class="tiny">运行前</text>
+  <text x="930" y="42" class="tiny">运行时</text>
+  <path d="M170 55 H610" stroke="#888" stroke-width="1.2"/>
+  <path d="M760 55 H1060" stroke="#888" stroke-width="1.2"/>
+
+  <rect x="55" y="105" width="145" height="118" class="box" fill="#F0F0F0"/>
+  <text x="102" y="138" class="label">输入</text>
+  <text x="75" y="177" class="small">R</text>
+  <text x="75" y="207" class="small">S</text>
+  <g fill="#D0E0F0" stroke="#777"><rect x="103" y="160" width="20" height="16"/><rect x="129" y="160" width="20" height="16"/><rect x="155" y="160" width="20" height="16"/></g>
+  <g fill="#E0F0E0" stroke="#777"><rect x="103" y="190" width="20" height="16"/><rect x="129" y="190" width="20" height="16"/><rect x="155" y="190" width="20" height="16"/></g>
+
+  <rect x="260" y="105" width="150" height="118" class="box" fill="#D0E0F0"/>
+  <circle cx="318" cy="154" r="22" fill="none" stroke="#555" stroke-width="3"/>
+  <line x1="334" y1="170" x2="365" y2="201" stroke="#555" stroke-width="3"/>
+  <text x="286" y="207" class="label">单趟扫描</text>
+
+  <rect x="470" y="105" width="150" height="118" class="box" fill="#FAD7C5"/>
+  <circle cx="516" cy="155" r="12" fill="#E9A38F" stroke="#666"/>
+  <circle cx="548" cy="155" r="12" fill="#D0E0F0" stroke="#666"/>
+  <circle cx="580" cy="155" r="12" fill="#E0F0E0" stroke="#666"/>
+  <text x="501" y="207" class="label">热点识别</text>
+
+  <rect x="680" y="105" width="150" height="118" class="box" fill="#E0F0E0"/>
+  <text x="716" y="135" class="label">四象限</text>
+  <rect x="712" y="155" width="42" height="28" fill="#E9A38F" stroke="#666"/><text x="720" y="176" class="tiny">HH</text>
+  <rect x="760" y="155" width="42" height="28" fill="#FAD7C5" stroke="#666"/><text x="768" y="176" class="tiny">HC</text>
+  <rect x="712" y="189" width="42" height="28" fill="#D0E0F0" stroke="#666"/><text x="720" y="210" class="tiny">CH</text>
+  <rect x="760" y="189" width="42" height="28" fill="#F0F0F0" stroke="#666"/><text x="768" y="210" class="tiny">CC</text>
+
+  <rect x="900" y="92" width="205" height="146" class="box" fill="#F0F0F0"/>
+  <text x="940" y="125" class="label">RDMA 集群</text>
+  <g stroke="#555">
+    <rect x="930" y="150" width="48" height="34" rx="5" fill="#D0E0F0"/>
+    <rect x="990" y="150" width="48" height="34" rx="5" fill="#FAD7C5"/>
+    <rect x="1050" y="150" width="48" height="34" rx="5" fill="#E0F0E0"/>
+    <rect x="960" y="195" width="48" height="34" rx="5" fill="#F0F0F0"/>
+    <rect x="1020" y="195" width="48" height="34" rx="5" fill="#D0E0F0"/>
+  </g>
+  <rect x="955" y="280" width="95" height="45" rx="7" fill="#FAD7C5" stroke="#555"/>
+  <text x="980" y="310" class="small">GMR</text>
+
+  <path class="arrow" d="M200 164 H260"/>
+  <path class="arrow" d="M410 164 H470"/>
+  <path class="arrow" d="M620 164 H680"/>
+  <path class="arrow" d="M830 164 H900"/>
+  <path class="dash" d="M545 225 C560 292,820 304,955 304"/>
+  <path class="dash" d="M1002 280 V238"/>
+  <text x="615" y="304" class="tiny">热点边界</text>
+</svg>

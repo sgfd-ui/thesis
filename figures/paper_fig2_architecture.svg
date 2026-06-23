@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="683" viewBox="0 0 2048 683">
+  <defs>
+    <style>
+      .big { font-family: 'Noto Sans CJK SC','Microsoft YaHei','PingFang SC',sans-serif; fill:#222222; font-weight:700; }
+      .title { font-size:58px; }
+      .secL { font-size:28px; fill:#4d78a5; }
+      .secR { font-size:28px; fill:#769e5c; }
+      .boxTitle { font-size:30px; }
+      .mid { font-size:24px; font-weight:500; }
+      .small { font-size:18px; font-weight:500; fill:#4a4a4a; }
+      .quad { font-size:24px; font-weight:500; }
+      .rs { font-size:30px; font-weight:500; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10Z" fill="#333"/>
+    </marker>
+  </defs>
+  <rect width="100%" height="100%" fill="#f4f4f4"/>
+
+  <!-- top banner -->
+  <rect x="35" y="26" width="1978" height="90" rx="18" ry="18" fill="#ece8f5" stroke="#a59ac8" stroke-width="2"/>
+  <text x="1024" y="81" text-anchor="middle" class="big title">RDMA 通信基础</text>
+
+  <!-- dashed regions -->
+  <rect x="35" y="142" width="1285" height="520" rx="18" ry="18" fill="none" stroke="#5f91c9" stroke-width="2.3" stroke-dasharray="10 10"/>
+  <rect x="1350" y="142" width="663" height="520" rx="18" ry="18" fill="none" stroke="#86b26f" stroke-width="2.3" stroke-dasharray="10 10"/>
+  <text x="617" y="188" text-anchor="middle" class="big secL">运行前</text>
+  <text x="1682" y="188" text-anchor="middle" class="big secR">运行时</text>
+
+  <!-- Input -->
+  <rect x="75" y="228" width="245" height="200" rx="18" ry="18" fill="#ffffff" stroke="#6a6a6a" stroke-width="2.2"/>
+  <text x="197" y="293" text-anchor="middle" class="big boxTitle">输入</text>
+  <text x="98" y="338" class="big rs">R</text>
+  <text x="98" y="397" class="big rs">S</text>
+  <rect x="144" y="316" width="40" height="30" fill="#bdd0e5" stroke="#8a8a8a" stroke-width="1.2"/>
+  <rect x="195" y="316" width="40" height="30" fill="#bdd0e5" stroke="#8a8a8a" stroke-width="1.2"/>
+  <rect x="246" y="316" width="40" height="30" fill="#bdd0e5" stroke="#8a8a8a" stroke-width="1.2"/>
+  <rect x="144" y="373" width="40" height="30" fill="#d7e6d5" stroke="#8a8a8a" stroke-width="1.2"/>
+  <rect x="195" y="373" width="40" height="30" fill="#d7e6d5" stroke="#8a8a8a" stroke-width="1.2"/>
+  <rect x="246" y="373" width="40" height="30" fill="#d7e6d5" stroke="#8a8a8a" stroke-width="1.2"/>
+
+  <!-- scan -->
+  <rect x="400" y="228" width="235" height="200" rx="18" ry="18" fill="#bdd0e5" stroke="#6a6a6a" stroke-width="2.2"/>
+  <text x="517" y="292" text-anchor="middle" class="big boxTitle">单趟扫描</text>
+  <text x="517" y="360" text-anchor="middle" class="big mid">本地统计</text>
+  <circle cx="492" cy="392" r="20" fill="none" stroke="#666" stroke-width="4"/>
+  <line x1="507" y1="407" x2="523" y2="423" stroke="#666" stroke-width="4"/>
+
+  <!-- feature recog -->
+  <rect x="710" y="228" width="245" height="200" rx="18" ry="18" fill="#f1d1bf" stroke="#6a6a6a" stroke-width="2.2"/>
+  <text x="833" y="292" text-anchor="middle" class="big boxTitle">特征识别</text>
+  <text x="833" y="357" text-anchor="middle" class="big mid">全局频率统计</text>
+  <circle cx="772" cy="390" r="18" fill="#eea287" stroke="#8a8a8a" stroke-width="1.3"/>
+  <circle cx="833" cy="390" r="18" fill="#bdd0e5" stroke="#8a8a8a" stroke-width="1.3"/>
+  <circle cx="894" cy="390" r="18" fill="#d7e6d5" stroke="#8a8a8a" stroke-width="1.3"/>
+
+  <!-- quadrant -->
+  <rect x="1035" y="228" width="250" height="200" rx="18" ry="18" fill="#d8e7d5" stroke="#6a6a6a" stroke-width="2.2"/>
+  <text x="1160" y="292" text-anchor="middle" class="big boxTitle">四象限</text>
+  <rect x="1076" y="302" width="78" height="54" fill="#eea287" stroke="#8a8a8a" stroke-width="1.3"/>
+  <rect x="1170" y="302" width="78" height="54" fill="#f3cfbf" stroke="#8a8a8a" stroke-width="1.3"/>
+  <rect x="1076" y="370" width="78" height="54" fill="#bdd0e5" stroke="#8a8a8a" stroke-width="1.3"/>
+  <rect x="1170" y="370" width="78" height="54" fill="#efefef" stroke="#8a8a8a" stroke-width="1.3"/>
+  <text x="1115" y="338" text-anchor="middle" class="big quad">HH</text>
+  <text x="1209" y="338" text-anchor="middle" class="big quad">HC</text>
+  <text x="1115" y="406" text-anchor="middle" class="big quad">CH</text>
+  <text x="1209" y="406" text-anchor="middle" class="big quad">CC</text>
+
+  <!-- runtime cluster -->
+  <rect x="1420" y="217" width="520" height="235" rx="18" ry="18" fill="#ffffff" stroke="#6a6a6a" stroke-width="2.2"/>
+  <text x="1680" y="275" text-anchor="middle" class="big boxTitle">执行集群 / Join 执行集群</text>
+  <rect x="1470" y="297" width="104" height="56" rx="10" ry="10" fill="#bdd0e5" stroke="#8a8a8a" stroke-width="1.2"/>
+  <rect x="1597" y="297" width="104" height="56" rx="10" ry="10" fill="#f1d1bf" stroke="#8a8a8a" stroke-width="1.2"/>
+  <rect x="1724" y="297" width="104" height="56" rx="10" ry="10" fill="#d7e6d5" stroke="#8a8a8a" stroke-width="1.2"/>
+  <rect x="1470" y="377" width="104" height="56" rx="10" ry="10" fill="#efefef" stroke="#8a8a8a" stroke-width="1.2"/>
+  <rect x="1597" y="377" width="104" height="56" rx="10" ry="10" fill="#bdd0e5" stroke="#8a8a8a" stroke-width="1.2"/>
+  <rect x="1724" y="377" width="104" height="56" rx="10" ry="10" fill="#e7e0ee" stroke="#8a8a8a" stroke-width="1.2"/>
+  <text x="1852" y="327" class="big boxTitle" style="font-size:24px;">…</text>
+  <text x="1852" y="407" class="big boxTitle" style="font-size:24px;">…</text>
+
+  <!-- runtime balancer -->
+  <rect x="1472" y="514" width="395" height="78" rx="14" ry="14" fill="#dce8d7" stroke="#6a6a6a" stroke-width="2.0"/>
+  <text x="1669" y="563" text-anchor="middle" class="big" style="font-size:28px;">RDMA 负载均衡组件</text>
+
+  <!-- arrows -->
+  <line x1="320" y1="323" x2="400" y2="323" stroke="#333" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="635" y1="323" x2="710" y2="323" stroke="#333" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="955" y1="323" x2="1035" y2="323" stroke="#333" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="1285" y1="323" x2="1420" y2="323" stroke="#333" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="1669" y1="514" x2="1669" y2="452" stroke="#333" stroke-width="3" marker-end="url(#arrow)"/>
+</svg>

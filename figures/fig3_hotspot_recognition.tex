@@ -1,0 +1,61 @@
+\documentclass[tikz,border=6pt]{standalone}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setmainfont{Times New Roman}
+\setCJKmainfont{SimSun}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\begin{document}
+\begin{tikzpicture}[
+  font=\small,
+  >={Stealth[length=2.2mm]},
+  stage/.style={draw=black!40, rounded corners=4pt, fill=#1, minimum width=1.7cm, minimum height=1.05cm, align=center},
+  arr/.style={->, line width=.6pt, black!70},
+  small/.style={font=\scriptsize}
+]
+\definecolor{blueA}{HTML}{D0E0F0}
+\definecolor{mintA}{HTML}{E0F0E0}
+\definecolor{peachA}{HTML}{FAD7C5}
+\definecolor{grayA}{HTML}{F0F0F0}
+\definecolor{hotA}{HTML}{E9A38F}
+
+\node[stage=grayA] (blocks) at (0,0) {数据块};
+\foreach \i in {0,...,4}{
+  \node[draw=black!30, fill=blueA, minimum width=.22cm, minimum height=.18cm] at (-.55+.27*\i,.26) {};
+  \node[draw=black!30, fill=mintA, minimum width=.22cm, minimum height=.18cm] at (-.55+.27*\i,-.14) {};
+}
+
+\node[stage=blueA] (gate) at (2.25,0) {阈值门控};
+\draw[black!55, line width=.8pt] (1.96,.35) -- (2.54,.35) -- (2.37,-.15) -- (2.13,-.15) -- cycle;
+\draw[black!55, line width=.8pt] (2.25,-.15) -- (2.25,-.42);
+
+\node[stage=peachA] (cand) at (4.55,0) {候选保留};
+\foreach \x/\y/\c in {-.42/.22/hotA,-.14/.22/peachA,.14/.22/blueA,.42/.22/mintA,-.26/-.22/grayA,.26/-.22/grayA}{
+  \node[draw=black!35, circle, fill=\c, minimum size=.22cm] at ($(cand.center)+(\x,\y)$) {};
+}
+\node[small] at (4.55,-.7) {Heavy / Light};
+
+\node[stage=mintA] (count) at (6.85,0) {压缩计数};
+\foreach \i in {0,...,4}{
+  \fill[black!35] (6.25+.17*\i,-.25) rectangle +(0.1,.55+.09*\i);
+}
+\draw[black!45] (6.18,-.32) rectangle (7.48,.42);
+
+\node[stage=peachA] (lock) at (9.15,0) {稳定保护};
+\draw[black!55, line width=.8pt] (9.0,.05) rectangle (9.32,-.28);
+\draw[black!55, line width=.8pt] (9.06,.05) arc[start angle=180,end angle=0,radius=.10cm];
+\node[draw=black!35, fill=hotA, rounded corners=1pt, minimum width=.65cm, minimum height=.18cm] at (9.15,.35) {};
+
+\node[stage=grayA, minimum width=1.55cm] (out) at (11.35,0) {};
+\node at (11.35,.48) {输出};
+\foreach \x/\y/\t/\c in {-.3/.10/HH/hotA,.3/.10/HC/peachA,-.3/-.34/CH/blueA,.3/-.34/CC/grayA}{
+  \node[draw=black!35, fill=\c, minimum width=.45cm, minimum height=.25cm, font=\scriptsize] at ($(out.center)+(\x,\y)$) {\t};
+}
+
+\draw[arr] (blocks) -- (gate);
+\draw[arr] (gate) -- node[above, small] {$f_i \ge \varepsilon\|f\|_p$} (cand);
+\draw[arr] (cand) -- (count);
+\draw[arr] (count) -- (lock);
+\draw[arr] (lock) -- node[above, small] {$H_R,H_S$} (out);
+
+\end{tikzpicture}
+\end{document}

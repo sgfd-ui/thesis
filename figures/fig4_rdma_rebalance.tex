@@ -1,0 +1,63 @@
+\documentclass[tikz,border=6pt]{standalone}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setmainfont{Times New Roman}
+\setCJKmainfont{SimSun}
+\usetikzlibrary{arrows.meta,positioning,calc,fit}
+\begin{document}
+\begin{tikzpicture}[
+  font=\small,
+  >={Stealth[length=2.2mm]},
+  nodebox/.style={draw=black!45, rounded corners=4pt, fill=#1, minimum width=2.15cm, minimum height=1.05cm, align=center},
+  mem/.style={draw=black!45, rounded corners=3pt, fill=#1, minimum width=1.85cm, minimum height=.55cm, align=center},
+  arr/.style={->, line width=.65pt, black!70},
+  dasharr/.style={->, dashed, line width=.55pt, black!60},
+  bar/.style={draw=black!45, rounded corners=1pt, minimum height=.16cm}
+]
+\definecolor{blueA}{HTML}{D0E0F0}
+\definecolor{mintA}{HTML}{E0F0E0}
+\definecolor{peachA}{HTML}{FAD7C5}
+\definecolor{grayA}{HTML}{F0F0F0}
+\definecolor{hotA}{HTML}{E9A38F}
+
+% execution nodes
+\node[nodebox=peachA] (v) at (0,1.25) {供给节点};
+\node[bar, fill=grayA, minimum width=1.35cm] at (0,.92) {};
+\fill[hotA] (-.42,.84) rectangle (.62,1.00);
+\node[font=\scriptsize] at (-.55,.66) {$Head$};
+\node[font=\scriptsize] at (.66,.66) {$Tail$};
+
+\node[nodebox=grayA] (t1) at (0,-1.25) {请求节点};
+\node[nodebox=mintA] (t2) at (3.25,-1.25) {空闲节点};
+
+% GMR
+\node[draw=black!45, rounded corners=5pt, fill=black!2, minimum width=3.05cm, minimum height=3.0cm] (gmr) at (4.75,1.05) {};
+\node[font=\bfseries] at (4.75,2.25) {GMR};
+\node[mem=blueA] (cw) at (4.75,1.75) {控制字};
+\node[mem=mintA] (bm) at (4.75,1.05) {活跃位图};
+\node[mem=peachA] (ss) at (4.75,.35) {双缓冲快照};
+\node[mem=grayA] (kp) at (4.75,-.35) {$K_{pool}$};
+
+% candidate list
+\node[draw=black!40, rounded corners=4pt, fill=grayA, minimum width=2.3cm, minimum height=1.15cm] (cand) at (8.35,1.05) {};
+\node at (8.35,1.45) {候选序列};
+\foreach \i/\c in {0/hotA,1/peachA,2/blueA,3/mintA}{
+  \node[draw=black!35, circle, fill=\c, minimum size=.24cm] at (7.75+.38*\i,.92) {};
+}
+\node[font=\scriptsize] at (8.35,.55) {取前 $K_{pool}$};
+
+% shadow slot/publish
+\node[draw=black!45, rounded corners=4pt, fill=peachA, minimum width=2.25cm, minimum height=.85cm] (pub) at (8.35,-1.25) {影子槽发布};
+
+\draw[arr] (t1.east) -- node[below, font=\scriptsize] {one-sided read} (gmr.south west);
+\draw[arr] (gmr.east) -- (cand.west);
+\draw[arr] (cand.south west) .. controls (6.9,.1) and (2.0,.25) .. node[above, font=\scriptsize] {CAS 让渡尾部} (v.east);
+\draw[dasharr] (t2.north) .. controls (3.25,.05) and (3.45,.8) .. (gmr.south);
+\draw[dasharr] (pub.west) -- node[below, font=\scriptsize] {原子切换} (gmr.east);
+\draw[dasharr] (gmr.south east) -- (pub.north west);
+
+\node[font=\scriptsize, black!70] at (1.45,2.25) {数据面：尾部区间};
+\node[font=\scriptsize, black!70] at (6.85,2.25) {控制面：快照视图};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <style>
+      .title { font: 700 32px 'Microsoft YaHei', 'PingFang SC', sans-serif; fill: #17354f; }
+      .lane { font: 700 22px 'Microsoft YaHei', 'PingFang SC', sans-serif; fill: #24425c; }
+      .text { font: 500 18px 'Microsoft YaHei', 'PingFang SC', sans-serif; fill: #355166; }
+      .boxBlue { fill: #edf5ff; stroke: #2b6fb9; stroke-width: 3; rx: 18; ry: 18; }
+      .boxOrange { fill: #fff2e5; stroke: #cf7a23; stroke-width: 3; rx: 18; ry: 18; }
+      .boxGreen { fill: #ebf7ee; stroke: #2c8a57; stroke-width: 3; rx: 18; ry: 18; }
+      .arrow { stroke: #2b6fb9; stroke-width: 3.5; fill: none; marker-end: url(#arrow); }
+      .arrowOrange { stroke: #cf7a23; stroke-width: 3.5; fill: none; marker-end: url(#arrowOrange); }
+      .dash { stroke: #7b8d9d; stroke-width: 2.5; fill: none; stroke-dasharray: 10 8; }
+    </style>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#2b6fb9"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#cf7a23"/>
+    </marker>
+  </defs>
+
+  <text x="70" y="68" class="title">图 7  Ephemeral leader 刷新与双缓冲发布时序</text>
+
+  <text x="130" y="130" class="lane">Trigger Node</text>
+  <text x="470" y="130" class="lane">Refresh Lock</text>
+  <text x="790" y="130" class="lane">Ephemeral Leader</text>
+  <text x="1110" y="130" class="lane">Shadow Slot</text>
+  <text x="1400" y="130" class="lane">Thief Readers</text>
+
+  <line x1="170" y1="160" x2="170" y2="830" class="dash"/>
+  <line x1="520" y1="160" x2="520" y2="830" class="dash"/>
+  <line x1="860" y1="160" x2="860" y2="830" class="dash"/>
+  <line x1="1180" y1="160" x2="1180" y2="830" class="dash"/>
+  <line x1="1460" y1="160" x2="1460" y2="830" class="dash"/>
+
+  <rect x="70" y="190" width="200" height="74" class="boxBlue"/>
+  <text x="99" y="234" class="text">thief 枯竭或 victim 老化</text>
+
+  <path d="M270 227 L470 227" class="arrowOrange"/>
+  <text x="305" y="210" class="text">CAS 竞争 Refresh_Lock</text>
+
+  <rect x="420" y="285" width="200" height="74" class="boxOrange"/>
+  <text x="459" y="328" class="text">仅一个节点成功</text>
+
+  <path d="M620 322 L760 322" class="arrow"/>
+  <rect x="700" y="285" width="320" height="74" class="boxBlue"/>
+  <text x="730" y="328" class="text">获胜节点成为 ephemeral leader</text>
+
+  <rect x="700" y="405" width="320" height="82" class="boxBlue"/>
+  <text x="730" y="447" class="text">并行读取各节点 Head / Tail</text>
+  <text x="730" y="474" class="text">重算 W_i 与 JFI</text>
+
+  <path d="M1020 446 L1085 446" class="arrow"/>
+  <rect x="1040" y="405" width="280" height="82" class="boxGreen"/>
+  <text x="1082" y="447" class="text">在 shadow slot 写入</text>
+  <text x="1082" y="474" class="text">新候选表与元数据</text>
+
+  <rect x="700" y="545" width="320" height="82" class="boxBlue"/>
+  <text x="726" y="587" class="text">正文写入完成后翻转 Active_Slot</text>
+  <text x="726" y="614" class="text">并递增 Visible_View_Version</text>
+
+  <path d="M1020 585 L1400 585" class="arrowOrange"/>
+  <text x="1130" y="564" class="text">新视图对外原子可见</text>
+
+  <rect x="1320" y="545" width="280" height="82" class="boxGreen"/>
+  <text x="1352" y="587" class="text">读到新 version + active slot</text>
+  <text x="1352" y="614" class="text">避免半写快照</text>
+
+  <rect x="700" y="685" width="320" height="74" class="boxBlue"/>
+  <text x="760" y="728" class="text">释放 Refresh_Lock</text>
+
+  <path d="M860 759 L560 759" class="arrow"/>
+  <rect x="390" y="722" width="260" height="74" class="boxOrange"/>
+  <text x="433" y="765" class="text">其他触发节点退避重读</text>
+
+  <rect x="70" y="722" width="220" height="74" class="boxBlue"/>
+  <text x="102" y="765" class="text">恢复普通工作节点</text>
+
+  <path d="M390 759 L290 759" class="arrow"/>
+
+  <rect x="1080" y="700" width="400" height="108" class="boxGreen"/>
+  <text x="1122" y="742" class="text">一致性语义:</text>
+  <text x="1122" y="772" class="text">只允许 “先写 shadow slot 正文”</text>
+  <text x="1122" y="800" class="text">再 “翻转 Active_Slot + 推进 Visible_View_Version”</text>
+</svg>

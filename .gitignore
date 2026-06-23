@@ -1,0 +1,15 @@
+*
+!.gitignore
+!研究内容一_正文版.md
+!对比实验.md
+!第三机制-论文机制说明.md
+!第三机制-实验流程说明.md
+!figures/
+!figures/**
+figures/**/*.aux
+figures/**/*.log
+!output/
+!output/mobile_preview/
+!output/mobile_preview/**
+!tmp/
+!tmp/render_mobile_preview.py

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300">
+  <defs>
+    <style>
+      text{font-family:"Microsoft YaHei","Source Han Sans SC","SimSun",sans-serif;fill:#222}
+      .box{stroke:#555;stroke-width:1.4;rx:10;ry:10}
+      .arrow{stroke:#333;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .label{font-size:22px;font-weight:600}.small{font-size:17px;fill:#555}
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L9,3 L0,6 Z" fill="#333"/></marker>
+  </defs>
+  <rect width="1200" height="300" fill="#fff"/>
+  <rect x="42" y="92" width="135" height="105" class="box" fill="#F0F0F0"/>
+  <text x="76" y="132" class="label">数据块</text>
+  <g stroke="#777">
+    <rect x="70" y="150" width="20" height="16" fill="#D0E0F0"/><rect x="96" y="150" width="20" height="16" fill="#D0E0F0"/><rect x="122" y="150" width="20" height="16" fill="#D0E0F0"/>
+    <rect x="70" y="174" width="20" height="16" fill="#E0F0E0"/><rect x="96" y="174" width="20" height="16" fill="#E0F0E0"/><rect x="122" y="174" width="20" height="16" fill="#E0F0E0"/>
+  </g>
+  <rect x="238" y="92" width="145" height="105" class="box" fill="#D0E0F0"/>
+  <path d="M274 125 H348 L326 166 H296 Z" fill="#fff" stroke="#555" stroke-width="2"/>
+  <text x="263" y="186" class="label">阈值门控</text>
+  <rect x="444" y="92" width="145" height="105" class="box" fill="#FAD7C5"/>
+  <circle cx="484" cy="133" r="13" fill="#E9A38F" stroke="#666"/><circle cx="520" cy="133" r="13" fill="#D0E0F0" stroke="#666"/><circle cx="556" cy="133" r="13" fill="#E0F0E0" stroke="#666"/>
+  <circle cx="502" cy="166" r="10" fill="#F0F0F0" stroke="#666"/><circle cx="538" cy="166" r="10" fill="#F0F0F0" stroke="#666"/>
+  <text x="471" y="222" class="small">Heavy / Light</text>
+  <text x="474" y="186" class="label">候选保留</text>
+  <rect x="650" y="92" width="145" height="105" class="box" fill="#E0F0E0"/>
+  <rect x="676" y="119" width="92" height="48" fill="#fff" stroke="#666"/>
+  <rect x="686" y="150" width="9" height="17" fill="#777"/><rect x="704" y="140" width="9" height="27" fill="#777"/><rect x="722" y="130" width="9" height="37" fill="#777"/><rect x="740" y="122" width="9" height="45" fill="#777"/>
+  <text x="680" y="186" class="label">压缩计数</text>
+  <rect x="856" y="92" width="145" height="105" class="box" fill="#FAD7C5"/>
+  <rect x="916" y="135" width="34" height="28" fill="#fff" stroke="#555" stroke-width="2"/>
+  <path d="M923 135 C923 112,943 112,943 135" fill="none" stroke="#555" stroke-width="2"/>
+  <rect x="895" y="115" width="76" height="13" fill="#E9A38F" stroke="#666"/>
+  <text x="886" y="186" class="label">稳定保护</text>
+  <rect x="1062" y="92" width="105" height="105" class="box" fill="#F0F0F0"/>
+  <rect x="1085" y="118" width="30" height="24" fill="#E9A38F" stroke="#666"/><text x="1091" y="136" class="small">HH</text>
+  <rect x="1120" y="118" width="30" height="24" fill="#FAD7C5" stroke="#666"/><text x="1126" y="136" class="small">HC</text>
+  <rect x="1085" y="148" width="30" height="24" fill="#D0E0F0" stroke="#666"/><text x="1091" y="166" class="small">CH</text>
+  <rect x="1120" y="148" width="30" height="24" fill="#F0F0F0" stroke="#666"/><text x="1126" y="166" class="small">CC</text>
+  <text x="1092" y="188" class="label">输出</text>
+  <path class="arrow" d="M177 145 H238"/><path class="arrow" d="M383 145 H444"/><path class="arrow" d="M589 145 H650"/><path class="arrow" d="M795 145 H856"/><path class="arrow" d="M1001 145 H1062"/>
+  <text x="391" y="126" class="small">阈值</text><text x="1015" y="126" class="small">H_R,H_S</text>
+</svg>

@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <defs>
+    <style>
+      .title { font: 700 32px 'Microsoft YaHei', 'PingFang SC', sans-serif; fill: #173651; }
+      .label { font: 600 23px 'Microsoft YaHei', 'PingFang SC', sans-serif; fill: #1c3a52; }
+      .text { font: 500 18px 'Microsoft YaHei', 'PingFang SC', sans-serif; fill: #355065; }
+      .box { fill: #eef5ff; stroke: #2d6fb8; stroke-width: 3; rx: 22; ry: 22; }
+      .decision { fill: #fff5e8; stroke: #cf7a23; stroke-width: 3; }
+      .end { fill: #ebf7ee; stroke: #2c8a57; stroke-width: 3; rx: 22; ry: 22; }
+      .warn { fill: #f8f9fb; stroke: #7b8a98; stroke-width: 3; rx: 22; ry: 22; }
+      .arrow { stroke: #2d6fb8; stroke-width: 4; fill: none; marker-end: url(#arrow); }
+      .arrowAlt { stroke: #cf7a23; stroke-width: 4; fill: none; marker-end: url(#arrowAlt); }
+      .arrowSoft { stroke: #7b8a98; stroke-width: 3; fill: none; marker-end: url(#arrowSoft); stroke-dasharray: 9 7; }
+    </style>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#2d6fb8"/>
+    </marker>
+    <marker id="arrowAlt" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#cf7a23"/>
+    </marker>
+    <marker id="arrowSoft" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#7b8a98"/>
+    </marker>
+  </defs>
+
+  <text x="70" y="70" class="title">图 6  Thief 的 one-shot pull 与 epoch-tagged CAS 流程</text>
+
+  <rect x="90" y="120" width="300" height="90" class="box"/>
+  <text x="130" y="175" class="label">1. 本地工作耗尽</text>
+  <text x="130" y="203" class="text">worker 切换为 thief</text>
+
+  <rect x="90" y="270" width="300" height="120" class="box"/>
+  <text x="125" y="320" class="label">2. one-shot pull</text>
+  <text x="125" y="355" class="text">一次 RDMA READ 读取</text>
+  <text x="125" y="382" class="text">version / active slot / JFI / candidates</text>
+
+  <rect x="90" y="450" width="300" height="120" class="box"/>
+  <text x="125" y="500" class="label">3. 本地决策</text>
+  <text x="125" y="535" class="text">计算 T_hat, r_steal, K_pool</text>
+  <text x="125" y="562" class="text">依次 probing 前 K_pool 个目标</text>
+
+  <polygon points="700,190 860,290 700,390 540,290" class="decision"/>
+  <text x="623" y="280" class="label">CAS 成功?</text>
+  <text x="593" y="314" class="text">Expected=[version|Tail_i]</text>
+  <text x="616" y="340" class="text">Swap=[version|Tail_i-C_steal]</text>
+
+  <rect x="1030" y="120" width="260" height="100" class="end"/>
+  <text x="1070" y="176" class="label">成功获取微批次</text>
+  <text x="1070" y="204" class="text">进入本地 join 执行</text>
+
+  <polygon points="700,470 860,570 700,670 540,570" class="decision"/>
+  <text x="586" y="560" class="label">版本是否推进?</text>
+  <text x="587" y="594" class="text">返回值 version &gt; local version</text>
+
+  <rect x="1010" y="505" width="280" height="110" class="warn"/>
+  <text x="1050" y="560" class="label">继续下一个候选</text>
+  <text x="1050" y="590" class="text">说明只是竞争失败</text>
+
+  <rect x="1010" y="700" width="280" height="110" class="end"/>
+  <text x="1042" y="755" class="label">放弃旧候选池并重拉</text>
+  <text x="1042" y="785" class="text">说明当前视图已经过期</text>
+
+  <rect x="540" y="735" width="280" height="92" class="warn"/>
+  <text x="585" y="786" class="label">安全性语义</text>
+  <text x="569" y="814" class="text">只有版本匹配且 Tail 未变时才生效</text>
+
+  <path d="M240 210 L240 270" class="arrow"/>
+  <path d="M240 390 L240 450" class="arrow"/>
+  <path d="M390 510 C460 510, 490 410, 590 330" class="arrow"/>
+  <path d="M860 290 L1030 170" class="arrow"/>
+  <text x="900" y="215" class="text">是</text>
+
+  <path d="M700 390 L700 470" class="arrowAlt"/>
+  <text x="723" y="435" class="text">否</text>
+
+  <path d="M860 570 L1010 560" class="arrowAlt"/>
+  <text x="905" y="545" class="text">否</text>
+
+  <path d="M700 670 L700 735" class="arrowSoft"/>
+  <path d="M860 620 C930 650, 965 690, 1010 735" class="arrowAlt"/>
+  <text x="900" y="675" class="text">是</text>
+
+  <rect x="70" y="760" width="360" height="95" class="box"/>
+  <text x="104" y="808" class="label">关键特点</text>
+  <text x="104" y="838" class="text">单 RTT 拉取视图，本地完成候选筛选与窃取量计算</text>
+</svg>

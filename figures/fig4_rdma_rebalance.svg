@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420">
+  <defs>
+    <style>
+      text{font-family:"Microsoft YaHei","Source Han Sans SC","SimSun",sans-serif;fill:#222}
+      .box{stroke:#555;stroke-width:1.4;rx:10;ry:10}
+      .arrow{stroke:#333;stroke-width:2.1;fill:none;marker-end:url(#arrow)}
+      .dash{stroke:#555;stroke-width:1.8;fill:none;stroke-dasharray:7 5;marker-end:url(#arrow)}
+      .label{font-size:22px;font-weight:600}.small{font-size:17px;fill:#555}.tiny{font-size:15px;fill:#555}
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L9,3 L0,6 Z" fill="#333"/></marker>
+  </defs>
+  <rect width="1200" height="420" fill="#fff"/>
+  <text x="125" y="45" class="tiny">数据面：尾部区间</text>
+  <text x="720" y="45" class="tiny">控制面：快照视图</text>
+
+  <rect x="70" y="75" width="210" height="115" class="box" fill="#FAD7C5"/>
+  <text x="130" y="110" class="label">供给节点</text>
+  <rect x="105" y="136" width="135" height="18" fill="#F0F0F0" stroke="#555"/>
+  <rect x="145" y="136" width="95" height="18" fill="#E9A38F" stroke="#555"/>
+  <text x="97" y="174" class="tiny">Head</text><text x="226" y="174" class="tiny">Tail</text>
+
+  <rect x="70" y="255" width="210" height="85" class="box" fill="#F0F0F0"/>
+  <text x="130" y="305" class="label">请求节点</text>
+  <rect x="360" y="255" width="210" height="85" class="box" fill="#E0F0E0"/>
+  <text x="420" y="305" class="label">空闲节点</text>
+
+  <rect x="620" y="75" width="245" height="220" class="box" fill="#FAFAFA"/>
+  <text x="715" y="110" class="label">GMR</text>
+  <rect x="666" y="130" width="150" height="35" rx="6" fill="#D0E0F0" stroke="#555"/><text x="704" y="153" class="small">控制字</text>
+  <rect x="666" y="174" width="150" height="35" rx="6" fill="#E0F0E0" stroke="#555"/><text x="700" y="197" class="small">活跃位图</text>
+  <rect x="666" y="218" width="150" height="35" rx="6" fill="#FAD7C5" stroke="#555"/><text x="690" y="241" class="small">双缓冲快照</text>
+  <rect x="666" y="262" width="150" height="35" rx="6" fill="#F0F0F0" stroke="#555"/><text x="705" y="285" class="small">K_pool</text>
+
+  <rect x="950" y="95" width="190" height="115" class="box" fill="#F0F0F0"/>
+  <text x="1000" y="128" class="label">候选序列</text>
+  <circle cx="992" cy="160" r="12" fill="#E9A38F" stroke="#666"/><circle cx="1030" cy="160" r="12" fill="#FAD7C5" stroke="#666"/><circle cx="1068" cy="160" r="12" fill="#D0E0F0" stroke="#666"/><circle cx="1106" cy="160" r="12" fill="#E0F0E0" stroke="#666"/>
+  <text x="1002" y="192" class="tiny">取前 K_pool</text>
+  <rect x="960" y="282" width="170" height="62" class="box" fill="#FAD7C5"/>
+  <text x="995" y="320" class="label">影子槽发布</text>
+
+  <path class="arrow" d="M280 298 C420 300,510 270,620 252"/>
+  <text x="410" y="280" class="tiny">one-sided read</text>
+  <path class="arrow" d="M865 155 H950"/>
+  <path class="arrow" d="M965 185 C770 220,430 205,280 145"/>
+  <text x="500" y="200" class="tiny">CAS 让渡尾部</text>
+  <path class="dash" d="M465 255 C480 185,540 145,620 145"/>
+  <path class="dash" d="M960 313 H865"/>
+  <text x="880" y="300" class="tiny">原子切换</text>
+</svg>

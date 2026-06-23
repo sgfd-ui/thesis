@@ -1,0 +1,191 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2172" height="724" viewBox="0 0 2172 724" role="img" aria-label="数据倾斜下的分布式等值连接长尾问题">
+  <defs>
+    <style>
+      .panel { fill: #fbfbfb; stroke: #5f5f5f; stroke-width: 2.4; }
+      .title { font-family: "Microsoft YaHei", "SimHei", "Noto Sans CJK SC", Arial, sans-serif; font-weight: 700; font-size: 42px; fill: #161616; }
+      .label { font-family: "Microsoft YaHei", "SimHei", "Noto Sans CJK SC", Arial, sans-serif; font-size: 30px; fill: #444; }
+      .nodeText { font-family: "Microsoft YaHei", "SimHei", "Noto Sans CJK SC", Arial, sans-serif; font-size: 24px; font-weight: 600; fill: #161616; }
+      .caption { font-family: "Microsoft YaHei", "SimHei", "Noto Sans CJK SC", Arial, sans-serif; font-size: 29px; fill: #555; }
+      .block { stroke: #636363; stroke-width: 1.6; rx: 2; ry: 2; }
+      .node { fill: #ffffff; stroke: #5f5f5f; stroke-width: 1.9; rx: 10; ry: 10; }
+      .flow { fill: none; stroke: #4e4e4e; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+      .axis { stroke: #4e4e4e; stroke-width: 2; }
+      .barBlue { fill: #8fb1ce; opacity: 0.95; }
+      .barHot { fill: #d54c3c; opacity: 0.96; }
+      .barWarm { fill: #df8e78; opacity: 0.9; }
+    </style>
+    <linearGradient id="blueBlock" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dbe8f3"/>
+      <stop offset="1" stop-color="#c7d9e9"/>
+    </linearGradient>
+    <linearGradient id="greenBlock" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e4f1e1"/>
+      <stop offset="1" stop-color="#d2e7d2"/>
+    </linearGradient>
+    <linearGradient id="hotBlock" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f1a68f"/>
+      <stop offset="1" stop-color="#df6e55"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#4e4e4e"/>
+    </marker>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- panels -->
+  <rect class="panel" x="32" y="42" width="650" height="640" rx="18"/>
+  <rect class="panel" x="761" y="42" width="650" height="640" rx="18"/>
+  <rect class="panel" x="1490" y="42" width="650" height="640" rx="18"/>
+
+  <!-- ===== Panel 1: uniform keys ===== -->
+  <g transform="translate(32,42)">
+    <text class="title" x="325" y="66" text-anchor="middle">均匀键</text>
+    <text class="label" x="42" y="170">R</text>
+    <text class="label" x="42" y="272">S</text>
+
+    <!-- R blocks -->
+    <rect class="block" x="92" y="137" width="42" height="46" fill="url(#blueBlock)"/>
+    <rect class="block" x="150" y="137" width="42" height="46" fill="url(#blueBlock)"/>
+    <rect class="block" x="208" y="137" width="42" height="46" fill="url(#blueBlock)"/>
+    <rect class="block" x="266" y="137" width="42" height="46" fill="url(#blueBlock)"/>
+
+    <!-- S blocks -->
+    <rect class="block" x="92" y="239" width="42" height="46" fill="url(#greenBlock)"/>
+    <rect class="block" x="150" y="239" width="42" height="46" fill="url(#greenBlock)"/>
+    <rect class="block" x="208" y="239" width="42" height="46" fill="url(#greenBlock)"/>
+    <rect class="block" x="266" y="239" width="42" height="46" fill="url(#greenBlock)"/>
+
+    <!-- worker nodes -->
+    <g filter="url(#softShadow)">
+      <rect class="node" x="472" y="136" width="146" height="48"/>
+      <rect class="node" x="472" y="204" width="146" height="48"/>
+      <rect class="node" x="472" y="272" width="146" height="48"/>
+      <rect class="node" x="472" y="340" width="146" height="48"/>
+    </g>
+    <text class="nodeText" x="545" y="168" text-anchor="middle">工作节点 1</text>
+    <text class="nodeText" x="545" y="236" text-anchor="middle">工作节点 2</text>
+    <text class="nodeText" x="545" y="304" text-anchor="middle">工作节点 3</text>
+    <text class="nodeText" x="545" y="372" text-anchor="middle">工作节点 4</text>
+
+    <!-- flow lines: aligned shuffling routes -->
+    <path class="flow" d="M 330 160 H 390"/>
+    <path class="flow" d="M 390 160 V 228"/>
+    <path class="flow" d="M 390 160 H 464" marker-end="url(#arrow)"/>
+    <path class="flow" d="M 390 228 H 464" marker-end="url(#arrow)"/>
+
+    <path class="flow" d="M 330 262 H 390"/>
+    <path class="flow" d="M 390 262 V 364"/>
+    <path class="flow" d="M 390 296 H 464" marker-end="url(#arrow)"/>
+    <path class="flow" d="M 390 364 H 464" marker-end="url(#arrow)"/>
+
+    <!-- load bars -->
+    <line class="axis" x1="110" y1="560" x2="395" y2="560"/>
+    <rect class="barBlue" x="132" y="470" width="34" height="90"/>
+    <rect class="barBlue" x="198" y="470" width="34" height="90"/>
+    <rect class="barBlue" x="264" y="470" width="34" height="90"/>
+    <rect class="barBlue" x="330" y="470" width="34" height="90"/>
+    <text class="caption" x="252" y="611" text-anchor="middle">负载接近</text>
+  </g>
+
+  <!-- ===== Panel 2: one-sided hotspot ===== -->
+  <g transform="translate(761,42)">
+    <text class="title" x="325" y="66" text-anchor="middle">单侧热点</text>
+    <text class="label" x="42" y="170">R</text>
+    <text class="label" x="42" y="272">S</text>
+
+    <!-- R blocks with single hotspot -->
+    <rect class="block" x="92" y="137" width="42" height="46" fill="url(#blueBlock)"/>
+    <rect class="block" x="150" y="137" width="58" height="46" fill="url(#hotBlock)"/>
+    <rect class="block" x="224" y="137" width="42" height="46" fill="url(#blueBlock)"/>
+    <rect class="block" x="282" y="137" width="42" height="46" fill="url(#blueBlock)"/>
+
+    <!-- S blocks normal -->
+    <rect class="block" x="92" y="239" width="42" height="46" fill="url(#greenBlock)"/>
+    <rect class="block" x="150" y="239" width="42" height="46" fill="url(#greenBlock)"/>
+    <rect class="block" x="208" y="239" width="42" height="46" fill="url(#greenBlock)"/>
+    <rect class="block" x="266" y="239" width="42" height="46" fill="url(#greenBlock)"/>
+
+    <!-- worker nodes -->
+    <g filter="url(#softShadow)">
+      <rect class="node" x="472" y="136" width="146" height="48"/>
+      <rect class="node" x="472" y="204" width="146" height="48"/>
+      <rect class="node" x="472" y="272" width="146" height="48"/>
+      <rect class="node" x="472" y="340" width="146" height="48"/>
+    </g>
+    <text class="nodeText" x="545" y="168" text-anchor="middle">工作节点 1</text>
+    <text class="nodeText" x="545" y="236" text-anchor="middle">工作节点 2</text>
+    <text class="nodeText" x="545" y="304" text-anchor="middle">工作节点 3</text>
+    <text class="nodeText" x="545" y="372" text-anchor="middle">工作节点 4</text>
+
+    <!-- flow lines -->
+    <path class="flow" d="M 340 160 H 410"/>
+    <path class="flow" d="M 410 160 V 228"/>
+    <path class="flow" d="M 410 160 H 464" marker-end="url(#arrow)"/>
+    <path class="flow" d="M 410 228 H 464" marker-end="url(#arrow)"/>
+
+    <path class="flow" d="M 330 262 H 410"/>
+    <path class="flow" d="M 410 262 V 364"/>
+    <path class="flow" d="M 410 296 H 464" marker-end="url(#arrow)"/>
+    <path class="flow" d="M 410 364 H 464" marker-end="url(#arrow)"/>
+
+    <!-- load bars: one local bottleneck, other bars moderate -->
+    <line class="axis" x1="120" y1="560" x2="445" y2="560"/>
+    <rect class="barWarm" x="150" y="502" width="34" height="58"/>
+    <rect class="barHot" x="224" y="430" width="40" height="130"/>
+    <rect class="barWarm" x="300" y="502" width="34" height="58"/>
+    <rect class="barWarm" x="376" y="502" width="34" height="58"/>
+    <text class="caption" x="282" y="611" text-anchor="middle">单点变慢</text>
+  </g>
+
+  <!-- ===== Panel 3: two-sided hotspot / long tail ===== -->
+  <g transform="translate(1490,42)">
+    <text class="title" x="325" y="66" text-anchor="middle">双侧热点</text>
+    <text class="label" x="42" y="170">R</text>
+    <text class="label" x="42" y="272">S</text>
+
+    <!-- R blocks with hotspot keys -->
+    <rect class="block" x="92" y="137" width="42" height="46" fill="url(#blueBlock)"/>
+    <rect class="block" x="150" y="137" width="50" height="46" fill="url(#hotBlock)"/>
+    <rect class="block" x="210" y="137" width="50" height="46" fill="url(#hotBlock)"/>
+    <rect class="block" x="276" y="137" width="42" height="46" fill="url(#blueBlock)"/>
+
+    <!-- S blocks with hotspot keys -->
+    <rect class="block" x="92" y="239" width="42" height="46" fill="url(#greenBlock)"/>
+    <rect class="block" x="150" y="239" width="50" height="46" fill="url(#hotBlock)"/>
+    <rect class="block" x="210" y="239" width="50" height="46" fill="url(#hotBlock)"/>
+    <rect class="block" x="276" y="239" width="42" height="46" fill="url(#greenBlock)"/>
+
+    <!-- worker nodes -->
+    <g filter="url(#softShadow)">
+      <rect class="node" x="472" y="136" width="146" height="48"/>
+      <rect class="node" x="472" y="204" width="146" height="48"/>
+      <rect class="node" x="472" y="272" width="146" height="48"/>
+      <rect class="node" x="472" y="340" width="146" height="48"/>
+    </g>
+    <text class="nodeText" x="545" y="168" text-anchor="middle">工作节点 1</text>
+    <text class="nodeText" x="545" y="236" text-anchor="middle">工作节点 2</text>
+    <text class="nodeText" x="545" y="304" text-anchor="middle">工作节点 3</text>
+    <text class="nodeText" x="545" y="372" text-anchor="middle">工作节点 4</text>
+
+    <!-- flow lines -->
+    <path class="flow" d="M 340 160 H 410"/>
+    <path class="flow" d="M 410 160 V 228"/>
+    <path class="flow" d="M 410 160 H 464" marker-end="url(#arrow)"/>
+    <path class="flow" d="M 410 228 H 464" marker-end="url(#arrow)"/>
+
+    <path class="flow" d="M 340 262 H 410"/>
+    <path class="flow" d="M 410 262 V 364"/>
+    <path class="flow" d="M 410 296 H 464" marker-end="url(#arrow)"/>
+    <path class="flow" d="M 410 364 H 464" marker-end="url(#arrow)"/>
+
+    <!-- load bars: clear long tail -->
+    <line class="axis" x1="120" y1="560" x2="445" y2="560"/>
+    <rect class="barWarm" x="150" y="530" width="34" height="30"/>
+    <rect class="barHot" x="224" y="350" width="40" height="210"/>
+    <rect class="barWarm" x="300" y="532" width="34" height="28"/>
+    <rect class="barWarm" x="376" y="532" width="34" height="28"/>
+    <text class="caption" x="282" y="611" text-anchor="middle">长尾任务</text>
+  </g>
+</svg>
