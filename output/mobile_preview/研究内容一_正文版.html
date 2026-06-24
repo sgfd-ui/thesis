@@ -187,15 +187,17 @@ pre{background:#f7f7f7;padding:12px;overflow:auto}
 <p><span class="math">$$ L_X^{plan}(k)=L_X^{stable}(k)+f_X^{residual}(k),\qquad U_X^{plan}(k)=U_X^{stable}(k)+f_X^{residual}(k). $$</span></p>
 <p>双侧统计确认只提高共同候选集合内键的两侧统计可靠性，不能重新发现未进入 <span class="math">$C$</span> 的键。因此，本章不会无条件声称已经恢复全局 top-<span class="math">$h$</span>；是否可以给出 top-<span class="math">$h$</span> 或阈值热点结论，取决于下一节的边界确认。</p>
 <h3>6.4 边界确认与热点集合生成</h3>
-<p>热点集合必须在边界确认之后生成。对关系 <span class="math">$X\in\{R,S\}$</span>，若候选键 <span class="math">$k$</span> 已有精确频率，则直接参与热点判定；若只有区间 <span class="math">$[L_X^{plan}(k),U_X^{plan}(k)]$</span>，则按三种情况处理：当 <span class="math">$L_X^{plan}(k)\ge\theta_X$</span> 时，即使考虑误差该键也进入 <span class="math">$H_X$</span>；当 <span class="math">$U_X^{plan}(k)&lt;\theta_X$</span> 时，该键可排除出 <span class="math">$H_X$</span>；当 <span class="math">$L_X^{plan}(k)&lt;\theta_X\le U_X^{plan}(k)$</span> 时，该键进入边界回查集合，需要进一步获得稳定部分精确贡献。</p>
-<p>本文将关系 <span class="math">$X$</span> 侧用于规划的热点集合写为</p>
+<p>热点集合必须在边界确认之后生成。对关系 <span class="math">$X\in\{R,S\}$</span>，若候选键 <span class="math">$k$</span> 已有精确频率，则直接参与热点判定；若只有区间 <span class="math">$[L_X^{plan}(k),U_X^{plan}(k)]$</span>，则按三种情况处理：当 <span class="math">$L_X^{plan}(k)\ge\theta_X|X|$</span> 时，即使考虑误差该键也进入阈值热点集合；当 <span class="math">$U_X^{plan}(k)&lt;\theta_X|X|$</span> 时，该键可排除出阈值热点集合；当 <span class="math">$L_X^{plan}(k)&lt;\theta_X|X|\le U_X^{plan}(k)$</span> 时，该键进入边界回查集合，需要进一步获得稳定部分精确贡献。top-<span class="math">$h$</span> 边界同样在候选充分性确认后确定。</p>
+<p>本文默认以 top-<span class="math">$h$</span> 与相对频率阈值的并集构造关系 <span class="math">$X$</span> 侧用于规划的热点集合，实验默认启用该并集规则；只有在消融实验中才分别关闭其中一项。该规则写为</p>
 <p><span class="math">$$ H_X=H_X^{top-h}\cup H_X^{threshold}, $$</span></p>
 <p>其中</p>
-<p><span class="math">$$ H_X^{threshold}=\{k\mid f_X^{plan}(k)\ge\theta_X\}. $$</span></p>
-<p>如果具体实现只采用 top-<span class="math">$h$</span> 或只采用阈值规则，也应显式关闭另一项规则。若采用 top-<span class="math">$h$</span>，还需要候选充分性判定。设候选集合中第 <span class="math">$h$</span> 大规划频率下界为 <span class="math">$L_{X,(h)}$</span>。只有当</p>
+<p><span class="math">$$ H_X^{threshold}=\{k\mid f_X^{plan}(k)/|X|\ge\theta_X\}. $$</span></p>
+<p>其中 <span class="math">$\theta_X$</span> 是相对频率阈值。<span class="math">$m=\alpha h$</span> 是初始候选预算，不是阈值热点数量的理论上限；若候选充分性不成立，系统必须动态扩大候选预算或回退。若采用 top-<span class="math">$h$</span>，设候选集合中第 <span class="math">$h$</span> 大规划频率下界为 <span class="math">$L_{X,(h)}$</span>。只有当</p>
 <p><span class="math">$$ B_X^{omit}&lt;L_{X,(h)} $$</span></p>
-<p>时，未枚举键才不可能进入当前 top-<span class="math">$h$</span> 候选边界；若采用阈值规则，也需要满足 <span class="math">$B_X^{omit}&lt;\theta_X$</span> 才能排除未枚举键越过阈值的风险。若这些条件不成立，系统不能直接声明已经获得全局 top-<span class="math">$h$</span> 或完整阈值热点集合，而必须扩大候选容量、读取更多稳定摘要、执行批量回查，或退化为 <code>REBUILD</code>。</p>
-<p>边界回查以候选集合为单位批量执行。系统把需要精确确认的键集合一次性下发到相关稳定分片，读取键计数索引或连接键列并返回局部计数，而不是逐键重复扫描。回查完成后，系统得到最终用于规划的 <span class="math">$H_R$</span> 与 <span class="math">$H_S$</span>，再导出两侧热点状态组合。这个顺序保证了频率区间和候选遗漏风险不会被提前固化为热点语义。</p>
+<p>时，未枚举键才不可能进入当前 top-<span class="math">$h$</span> 候选边界；阈值规则对应的认证条件为</p>
+<p><span class="math">$$ B_X^{omit}&lt;\theta_X|X|. $$</span></p>
+<p>这两条分别用于排除未知遗漏键进入 top-<span class="math">$h$</span> 或越过相对频率阈值的风险。若条件不成立，系统不能直接声明已经获得全局 top-<span class="math">$h$</span> 或完整阈值热点集合。</p>
+<p>边界确认需要区分两类问题。第一类是候选内边界确认：键 <span class="math">$k\in C$</span> 已经进入共同候选集合，但其频率区间跨越阈值或 top-<span class="math">$h$</span> 边界。此时系统把已知边界键集合一次性下发到相关稳定分片，读取键计数索引或连接键列并返回局部计数，从而获得精确贡献。第二类是候选充分性确认：当 <span class="math">$B_X^{omit}\ge L_{X,(h)}$</span> 或 <span class="math">$B_X^{omit}\ge\theta_X|X|$</span> 时，问题不是某个已知键计数不准，而是可能存在尚未进入 <span class="math">$C$</span> 的未知键。此时按键批量回查无法解决，系统必须扩大本地候选容量、从稳定摘要导出更多候选、重新扫描并采用更大预算，或进入 <code>REBUILD</code>。上述确认完成后，系统才得到最终用于规划的 <span class="math">$H_R$</span> 与 <span class="math">$H_S$</span>，再导出两侧热点状态组合。</p>
 <h3>6.5 双侧负载语义与初始计划</h3>
 <p>基于确认后的 <span class="math">$H_R$</span> 与 <span class="math">$H_S$</span>，系统定义两侧热点状态组合 <span class="math">$z(k)$</span>：</p>
 <table><thead><tr><th>状态组合</th><th>条件</th><th>含义</th></tr></thead><tbody>
@@ -207,15 +209,19 @@ pre{background:#f7f7f7;padding:12px;overflow:auto}
 <p>状态组合只描述两侧热点成员关系，不能因为 <span class="math">$f_R(k)f_S(k)$</span> 或工作量估计较高而反向修改 <span class="math">$H_R/H_S$</span>。高工作量边界键可以进入特殊规划对象集合，评估更强的拆分或复制策略，但其 <code>HH/HC/CH/CC</code> 定义保持不变。</p>
 <p>本章把单键工作量拆成内在连接工作量和策略相关代价。内在连接工作量描述键本身带来的输入处理、匹配和输出规模，可抽象写为</p>
 <p><span class="math">$$ W(k)=\beta_{in}(f_R(k)+f_S(k))+\beta_{match}f_R(k)f_S(k)+\beta_{out}o(k), $$</span></p>
-<p>其中 <span class="math">$o(k)$</span> 表示键 <span class="math">$k$</span> 的输出规模。对本文讨论的普通内等值连接，<span class="math">$o(k)=f_R(k)f_S(k)$</span>；只有扩展到额外过滤、外连接或其他输出语义时，才需要引入独立输出规模估计。数据移动、轻侧复制、键内拆分和节点资源占用不进入 <span class="math">$W(k)$</span>，而由候选策略代价 <span class="math">$Cost(k,a)$</span> 描述。</p>
+<p>其中 <span class="math">$o(k)$</span> 表示键 <span class="math">$k$</span> 的输出规模。对本文讨论的普通内等值连接，<span class="math">$o(k)=f_R(k)f_S(k)$</span>；只有扩展到额外过滤、外连接或其他输出语义时，才需要引入独立输出规模估计。式中 <span class="math">$\beta_{match}f_R(k)f_S(k)$</span> 表示匹配枚举、探测和记录对生成的计算成本，<span class="math">$\beta_{out}o(k)$</span> 表示结果序列化、写出或传输成本；二者都与匹配规模相关，但刻画的是不同执行环节。</p>
+<p>策略相关代价不只表示移动、复制和拆分的附加开销，而是策略下的总估计代价。对候选策略 <span class="math">$a$</span>，本文写为</p>
+<p><span class="math">$$ Cost(k,a)=T_{exec}(k,a\mid W(k),Ctx)+C_{overhead}(k,a\mid Ctx), $$</span></p>
+<p>其中 <span class="math">$T_{exec}$</span> 表示策略 <span class="math">$a$</span> 下内在工作量被分配后的预计执行时间，<span class="math">$C_{overhead}$</span> 表示数据移动、复制、拆分、协调和资源占用等额外开销。</p>
 <p>当前轮初始计划合成分四步。第一，构造规划视图：<code>FULL_REUSE</code> 可使用已验证完整历史状态并重算参数；<code>PARTIAL_REUSE</code> 中的 <span class="math">$K_{reuse}$</span> 只作为策略模板种子，必须合并当前残余贡献后重新检查状态组合、工作量和策略代价；残余识别得到的热点、边界候选和高 <span class="math">$W(k)$</span> 候选进入显式规划集合；其余普通键沿默认哈希路径执行。第二，生成候选执行策略，包括分类路由、轻侧复制、键内拆分和常规哈希。第三，在当前枚举的候选策略集合 <span class="math">$\mathcal A(k)$</span> 中选择估计代价最低的可行策略：</p>
 <p><span class="math">$$ a^*(k)=\arg\min_{a\in\mathcal A(k)} Cost(k,a\mid z(k),W(k),Ctx), $$</span></p>
 <p>并满足</p>
 <p><span class="math">$$ Memory(k,a)\le M,\qquad Parallelism(k,a)\le P, $$</span></p>
 <p>以及任务覆盖、任务互斥和唯一输出约束。该选择只是在当前候选策略集合内进行代价比较，不声称得到全局最优计划。第四，输出完整初始负载计划，包括特殊规划键显式任务、普通键默认任务，以及历史稳定部分和当前识别部分的合并结果。</p>
 <h3>6.6 正确性与开销</h3>
-<p>双侧负载识别的正确性边界首先来自候选充分性。对进入共同候选集合 <span class="math">$C$</span> 的键，系统通过双侧统计、稳定贡献查询和边界回查获得更可靠的两侧统计；对未进入 <span class="math">$C$</span> 的键，系统只能在 <span class="math">$B_X^{omit}$</span> 被证明低于 top-<span class="math">$h$</span> 或阈值边界时排除其影响。若无法证明候选充分，算法必须扩大候选、回查或 <code>REBUILD</code>，而不能把候选集合直接等同于全局热点集合。</p>
-<p>识别误差与连接结果正确性需要分开理解。热点漏报或边界误判会降低初始负载规划质量，可能增加执行时间或触发第 7 章再平衡；但只要普通默认路径能够完整处理任意键，识别误差本身不改变等值连接谓词，也不改变应输出的记录对集合。最终连接正确性依赖初始计划满足任务覆盖、任务互斥、默认路径完备和唯一输出约束。</p>
+<p>双侧负载识别的正确性边界首先来自候选充分性。对进入共同候选集合 <span class="math">$C$</span> 的键，系统通过双侧统计、稳定贡献查询和边界回查获得更可靠的两侧统计；对未进入 <span class="math">$C$</span> 的键，系统只能在 <span class="math">$B_X^{omit}$</span> 被证明低于 top-<span class="math">$h$</span> 或阈值边界时排除其影响。若未枚举键上界是确定性的，且候选充分性检查通过，则热点集合在当前规则下完整；若上界来自概率型 sketch，则该结论以至少 <span class="math">$1-\delta$</span> 的置信度成立。无法认证时，系统不能按完整热点集合叙述，而必须扩大候选、执行更多摘要读取或回退。</p>
+<p>识别误差与连接结果正确性需要分开理解。认证通过后的剩余风险主要来自概率性摘要失败、代价估计误差，或系统在启发式模式下选择提前停止候选扩展；这些因素会降低初始负载规划质量，可能增加执行时间或触发第 7 章再平衡。只要普通默认路径能够完整处理任意键，识别误差本身不改变等值连接谓词，也不改变应输出的记录对集合。最终连接正确性依赖初始计划满足任务覆盖、任务互斥、默认路径完备和唯一输出约束。</p>
+<p><code>REBUILD</code> 提供终止性的精确回退路径。系统首先在完整输入上重新执行候选发现和验证；如果扩大候选容量后仍无法通过候选充分性认证，则退化为完整键频率聚合，直接获得当前输入上的精确键频率，再生成热点集合和初始计划。这样避免“候选不足后反复重建但仍无法认证”的循环。</p>
 <p>控制开销由四部分组成：残余候选扫描、候选导出与跨节点汇聚、候选受限的双侧统计和边界回查、初始计划合成。候选导出规模受每节点每关系 <span class="math">$\alpha h$</span> 限制，跨节点汇聚前候选条目上界为 <span class="math">$2N\alpha h$</span>，该上界约束候选通信和汇聚状态，不约束输入访问量。<code>PARTIAL_REUSE</code> 的主要开销可写为</p>
 <p><span class="math">$$ T_{partial}=T_{discover}(\Omega_{residual})+T_{count}(\Omega_{residual},C)+T_{stableLookup}(C)+T_{boundary}+T_{plan}. $$</span></p>
 <p>其中，<span class="math">$|C|$</span> 控制计数状态、统计结果和候选汇总规模，<span class="math">$|\Omega_{residual}|$</span> 控制实际输入扫描成本，边界回查范围控制稳定分片的额外访问成本。候选汇聚通信上界为 <span class="math">$O(N\alpha h)$</span>；若每个节点都向协调端汇总共同候选计数，计数通信可表示为 <span class="math">$O(N|C|)$</span>，也可以采用只上报本地出现键的稀疏汇总。<code>FULL_REUSE</code> 省去当前轮候选发现和双侧统计，但仍需参数实例化；<code>REBUILD</code> 则执行完整当前轮识别和计划合成。</p>
@@ -229,8 +235,10 @@ pre{background:#f7f7f7;padding:12px;overflow:auto}
   split_parameter
   assigned_node
   progress_boundary
+  boundary_locator
+  cost_prefix_or_unit_model
 }</code></pre>
-<p>其中，<code>key_or_partition_scope</code> 表示任务处理的键或分区范围，<code>route_rule</code> 表示执行该任务所需的数据访问和路由规则，<code>split_parameter</code> 表示执行前规划得到的热点拆分参数，<code>assigned_node</code> 表示初始归属节点，<code>progress_boundary</code> 可表示为 <span class="math">$[Head,Tail)$</span> 形式的可继续划分边界。不同任务范围必须互斥，或通过唯一输出规则避免重复结果。</p>
+<p>其中，<code>key_or_partition_scope</code> 表示任务处理的键或分区范围，<code>route_rule</code> 表示执行该任务所需的数据访问和路由规则，<code>split_parameter</code> 表示执行前规划得到的热点拆分参数，<code>assigned_node</code> 表示初始归属节点。对近似等代价任务，<code>progress_boundary</code> 可表示为 <span class="math">$[Head,Tail)$</span> 形式的可继续划分边界；对加权任务，任务还需要提供 <code>boundary_locator</code> 或 <code>cost_prefix_or_unit_model</code>，使第 7 章能够按照目标工作量定位新的尾部边界。不同任务范围必须互斥，或通过唯一输出规则避免重复结果。</p>
 <p>这里并不表示执行前已经生成完整的可接管微任务集合。第 6 章只生成初始路由、热点拆分参数、初始任务归属和可描述边界；快照刷新条件、供给节点选择、微任务大小、RDMA 原子领取和进度协议都属于第 7 章。二者的接口关系是：第 6 章生成初始任务及其边界，初始任务执行后形成真实剩余工作，第 7 章再根据剩余负载快照进行动态微任务划分和接管。</p>
 <h2>7 快照驱动的剩余工作再平衡算法</h2>
 <h3>7.1 问题与设计选择</h3>
