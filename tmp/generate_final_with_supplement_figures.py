@@ -450,7 +450,7 @@ def plot_fig9(df: pd.DataFrame, summary: list[dict]) -> None:
     axes[1, 1].text(0.02, 0.88, "(d) Ablation mapping", fontsize=10, fontweight="bold")
     axes[1, 1].text(0.02, 0.72, "\n".join(mapping), va="top", fontsize=9)
     axes[0, 0].legend(ncol=3, fontsize=7, loc="upper left", bbox_to_anchor=(0, 1.32))
-    write_outputs(fig, "fig9_mechanism_ablation")
+    write_outputs(fig, "fig12_mechanism_ablation")
     for _, row in slow.iterrows():
         summary.append({"section": "E5", "metric": f"{row['case']}::{row['method']}_slowdown", "value": row["slowdown"], "n": 1})
 
@@ -561,7 +561,7 @@ def plot_fig12(df: pd.DataFrame, e1b: pd.DataFrame, summary: list[dict]) -> None
     axes[1, 1].set_xticklabels([short_case(c) for c in counts.index], rotation=25, ha="right")
     handles, labels = axes[1, 0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="upper center", ncol=4, bbox_to_anchor=(0.5, 1.04), fontsize=8)
-    write_outputs(fig, "fig12_history_reuse")
+    write_outputs(fig, "fig9_history_reuse")
     for status, val in zip(order_status, means):
         summary.append({"section": "E7", "metric": f"{status}_mean_time", "value": val, "n": int(ours["reuse_status"].eq(status).sum())})
     summary.append({"section": "E1B", "metric": "controlled_work_audit_pass_rows", "value": int(e1b["validation"].eq("pass").sum()), "n": len(e1b)})

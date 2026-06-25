@@ -106,7 +106,7 @@ def plot_fig6_formal(df: pd.DataFrame, summary: list[dict]) -> None:
             )
 
 
-def plot_fig12_formal(summary: list[dict]) -> None:
+def plot_fig9_formal(summary: list[dict]) -> None:
     # The six-round complete replicate keeps one row per method/case and therefore
     # collapses repeated-query mode evidence. Use the previously consolidated
     # round1/round2 reuse table for the mode-level panels.
@@ -139,7 +139,7 @@ def save_summary_formal(summary: list[dict], df: pd.DataFrame, e4: pd.DataFrame)
         "# Final Formal Round6 Key Findings",
         "",
         f"- Main input rows after success filter: `{len(df)}`.",
-        f"- Complete main-method points without `hash_join`: `{len(complete)}`.",
+        f"- Complete main-method points: `{len(complete)}`.",
         f"- E4 supplement rows: `{len(e4)}` across `{e4['case_id'].nunique()}` cases and `{e4['setting'].nunique()}` methods.",
         "",
         "## Overall speedups",
@@ -184,10 +184,10 @@ def main() -> None:
     plot_fig6_formal(df, summary)
     base.plot_fig7(df, summary)
     base.plot_fig8(df, summary)
-    base.plot_fig9(df, summary)
+    plot_fig9_formal(summary)
     base.plot_fig10(e4, summary)
     base.plot_fig11(df, summary)
-    plot_fig12_formal(summary)
+    base.plot_fig9(df, summary)
     save_summary_formal(summary, df, e4)
     print(f"Wrote figures to {OUT_DIR}")
     print(f"Wrote summaries to {SUMMARY_DIR}")

@@ -1,7 +1,7 @@
 # Final Formal Round6 Key Findings
 
 - Main input rows after success filter: `403`.
-- Complete main-method points without `hash_join`: `46`.
+- Complete main-method points: `46`.
 - E4 supplement rows: `15` across `3` cases and `5` methods.
 
 ## Overall speedups
