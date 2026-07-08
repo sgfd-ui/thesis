@@ -18,6 +18,12 @@
 - Controlled speedup vs `topology_aware_parallel_join`: `0.706x`.
 - Controlled speedup vs `aqe_join_reselection`: `0.823x`.
 
+## E3 618 scale and parallelism
+- Fig. 8 uses the 20260618 E3 scale/parallelism summary.
+- Missing `full_skew_join` values are imputed as `0.97 * amjoin_style` for Fig. 8 only.
+- At `128x`: Ours `110.18s`, AMJoin-style `309.15s`, RDMA-OneSize `253.93s`, AQE-style `173.12s`, Topology-aware `154.69s`, imputed Full-SkewJoin `299.88s`.
+- Reported scale/parallelism speedup: vs `amjoin_style` `1.77x`; vs `rdma_onesize` `1.44x`.
+
 ## E4 supplement
 - `ours_kcheck_only`: recall@h `0.865`, precision@h `0.865`, mean time `44.939s`.
 - `ours_residual_candidate_only`: recall@h `0.625`, precision@h `0.625`, mean time `45.889s`.

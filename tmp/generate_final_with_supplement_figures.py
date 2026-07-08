@@ -258,22 +258,22 @@ def plot_fig5(df: pd.DataFrame, summary: list[dict]) -> None:
     axes[1].set_ylabel("Load CV")
     axes[1].tick_params(axis="x", rotation=25)
 
-    speedup_data = [piv[b] / piv["ours"] for b in BASELINES]
-    bp = axes[2].boxplot(speedup_data, patch_artist=True, labels=[method_label(b) for b in BASELINES])
+    ratio_data = [piv[b] / piv["ours"] for b in BASELINES]
+    bp = axes[2].boxplot(ratio_data, patch_artist=True, labels=[method_label(b) for b in BASELINES])
     for patch, b in zip(bp["boxes"], BASELINES):
         patch.set_facecolor(method_color(b))
         patch.set_alpha(0.65)
     axes[2].axhline(1.0, color="#333333", ls="--", lw=1)
-    axes[2].set_title("(c) Baseline/Ours speedup")
-    axes[2].set_ylabel("Speedup")
+    axes[2].set_title("(c) Relative completion-time ratio")
+    axes[2].set_ylabel(r"$T_{baseline}/T_{ours}$")
     axes[2].tick_params(axis="x", rotation=25)
     for i, b in enumerate(BASELINES, start=1):
         gm = geomean(piv[b] / piv["ours"])
-        axes[2].text(i, np.nanmax(speedup_data[i - 1]) * 1.03, f"{gm:.2f}x", ha="center", fontsize=8)
+        axes[2].text(i, np.nanmax(ratio_data[i - 1]) * 1.03, f"{gm:.2f}x", ha="center", fontsize=8)
         summary.append(
             {
                 "section": "overall",
-                "metric": f"speedup_vs_{b}",
+                "metric": f"relative_time_ratio_vs_{b}",
                 "value": gm,
                 "n": int((piv[b] / piv["ours"]).count()),
                 "wins": int((piv[b] / piv["ours"] > 1).sum()),
@@ -351,7 +351,7 @@ def plot_fig7(df: pd.DataFrame, summary: list[dict]) -> None:
 
     piv = sub.pivot_table(index=["case_id"], columns="setting", values="end_to_end_time", aggfunc="first").dropna(subset=MAIN_METHODS)
     for b in BASELINES:
-        summary.append({"section": "E2", "metric": f"speedup_vs_{b}", "value": geomean(piv[b] / piv["ours"]), "n": len(piv)})
+        summary.append({"section": "E2", "metric": f"relative_time_ratio_vs_{b}", "value": geomean(piv[b] / piv["ours"]), "n": len(piv)})
 
 
 def plot_fig8(df: pd.DataFrame, summary: list[dict]) -> None:
@@ -380,7 +380,7 @@ def plot_fig8(df: pd.DataFrame, summary: list[dict]) -> None:
 
     piv = sub.pivot_table(index=["case_id"], columns="setting", values="end_to_end_time", aggfunc="first").dropna(subset=MAIN_METHODS)
     for b in BASELINES:
-        summary.append({"section": "E3", "metric": f"speedup_vs_{b}", "value": geomean(piv[b] / piv["ours"]), "n": len(piv)})
+        summary.append({"section": "E3", "metric": f"relative_time_ratio_vs_{b}", "value": geomean(piv[b] / piv["ours"]), "n": len(piv)})
 
 
 def plot_fig9(df: pd.DataFrame, summary: list[dict]) -> None:
@@ -517,7 +517,7 @@ def plot_fig11(df: pd.DataFrame, summary: list[dict]) -> None:
     handles, labels = axes[0, 0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="upper center", ncol=6, bbox_to_anchor=(0.5, 1.04), fontsize=8)
     write_outputs(fig, "fig11_runtime_rebalance")
-    summary.append({"section": "E6", "metric": "no_rebalance_mean_slowdown", "value": float(ratio.mean()), "n": int(ratio.count())})
+    summary.append({"section": "E6", "metric": "no_rebalance_relative_time_ratio", "value": float(ratio.mean()), "n": int(ratio.count())})
 
 
 def plot_fig12(df: pd.DataFrame, e1b: pd.DataFrame, summary: list[dict]) -> None:
@@ -580,12 +580,12 @@ def save_summary(summary: list[dict], df: pd.DataFrame, e4: pd.DataFrame, e1b: p
         f"- E4 supplement rows: `{len(e4)}` across `{e4['case_id'].nunique()}` cases and `{e4['setting'].nunique()}` methods.",
         f"- E1B controlled-work audit rows: `{len(e1b)}`; max error `{e1b['join_work_error_percent'].max():.4f}%`.",
         "",
-        "## Overall speedups",
+        "## Overall relative completion-time ratios",
     ]
     for b in BASELINES:
         ratio = complete[b] / complete["ours"]
         lines.append(
-            f"- Baseline/Ours `{b}`: geomean `{geomean(ratio):.3f}x`, wins for Ours `{int((ratio > 1).sum())}/{int(ratio.count())}`."
+            f"- `{b}` / Ours relative completion-time ratio: geomean `{geomean(ratio):.3f}x`, Ours shorter in `{int((ratio > 1).sum())}/{int(ratio.count())}` points."
         )
     lines.extend(["", "## E4 supplement"])
     for method in ["ours_kcheck_only", "ours_residual_candidate_only", "ours_no_boundary_lookup", "ours", "oracle_full_rebuild_exact"]:
