@@ -169,6 +169,7 @@ def convert_body(md: str) -> str:
     table_buf: list[str] = []
     in_code = False
     code_buf: list[str] = []
+    code_lang = ""
     in_refs = False
     refs: list[tuple[str, str]] = []
     in_enum = False
@@ -185,8 +186,66 @@ def convert_body(md: str) -> str:
             out.append(r"\end{enumerate}")
             in_enum = False
 
+    def render_algorithm_block(lines: list[str]) -> str:
+        nonempty = [ln for ln in lines if ln.strip()]
+        if not nonempty:
+            return ""
+        title = nonempty[0].strip()
+        idx = 1
+        inputs: list[str] = []
+        outputs: list[str] = []
+        while idx < len(nonempty):
+            stripped = nonempty[idx].strip()
+            if stripped.startswith("输入："):
+                inputs.append(stripped[len("输入："):].strip())
+                idx += 1
+                continue
+            if stripped.startswith("输出："):
+                outputs.append(stripped[len("输出："):].strip())
+                idx += 1
+                continue
+            break
+        body = nonempty[idx:]
+        rows = [
+            r"\begin{table}[t]",
+            r"\centering",
+            r"\scriptsize",
+            r"\renewcommand{\arraystretch}{0.92}",
+            r"\begin{tabularx}{0.98\linewidth}{@{}r>{\raggedright\arraybackslash}X@{}}",
+            r"\toprule",
+            r"\multicolumn{2}{@{}l}{\textbf{" + convert_inline(title) + r"}}\\",
+        ]
+        if inputs:
+            rows.append(r"\multicolumn{2}{@{}l}{\textbf{输入：}" + convert_inline("；".join(inputs)) + r"}\\")
+        if outputs:
+            rows.append(r"\multicolumn{2}{@{}l}{\textbf{输出：}" + convert_inline("；".join(outputs)) + r"}\\")
+        rows.append(r"\midrule")
+        for raw_line in body:
+            if not raw_line.strip():
+                continue
+            indent = len(raw_line) - len(raw_line.lstrip(" "))
+            text = raw_line.strip()
+            line_no = ""
+            m = re.match(r"^(\d+)\.\s*(.*)$", text)
+            if m:
+                line_no, text = m.group(1), m.group(2)
+            indent_cmd = ""
+            if indent:
+                indent_cmd = r"\hspace*{" + f"{min(indent / 4.0, 4.0):.1f}" + r"em}"
+            rows.append(line_no + " & " + indent_cmd + latex_escape(text) + r"\\")
+        rows.extend([r"\bottomrule", r"\end{tabularx}", r"\end{table}"])
+        return "\n".join(rows)
+
     def flush_code():
-        nonlocal code_buf
+        nonlocal code_buf, code_lang
+        first = next((ln.strip() for ln in code_buf if ln.strip()), "")
+        if code_lang == "algorithm" or first.startswith("算法"):
+            rendered = render_algorithm_block(code_buf)
+            if rendered:
+                out.append(rendered)
+            code_buf = []
+            code_lang = ""
+            return
         out.append(r"\begin{quote}")
         out.append(r"\small")
         for code_line in code_buf:
@@ -196,6 +255,7 @@ def convert_body(md: str) -> str:
                 out.append(r"\par")
         out.append(r"\end{quote}")
         code_buf = []
+        code_lang = ""
 
     for raw in lines:
         line = raw.rstrip()
@@ -205,6 +265,7 @@ def convert_body(md: str) -> str:
                 flush_table()
                 close_enum()
                 in_code = True
+                code_lang = line.strip()[3:].strip().lower()
                 code_buf = []
             else:
                 flush_code()
@@ -271,6 +332,12 @@ def convert_body(md: str) -> str:
             close_enum()
             title = line[4:].strip()
             out.append(r"\subsection{" + convert_inline(re.sub(r"^\d+\.\d+\s*", "", title)) + "}")
+            continue
+        if line.startswith("#### "):
+            close_enum()
+            title = line[5:].strip()
+            title = re.sub(r"^\d+\.\d+\.\d+\s*", "", title)
+            out.append(r"\paragraph{" + convert_inline(title) + "}")
             continue
 
         img = re.match(r"^!\[(.*?)\]\((.*?)\)$", line.strip())

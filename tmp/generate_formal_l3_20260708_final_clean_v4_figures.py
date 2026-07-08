@@ -176,6 +176,17 @@ def _format_value(v: object) -> str:
         "public_workload_profile_scaled_public_proxy_1": "profile proxy 1",
         "public_workload_profile_scaled_public_proxy_2": "profile proxy 2",
         "modeled_profile_scaled_pilot": "profile pilot",
+        "state_mix_balanced": "balanced",
+        "state_mix_hh_dominant": "HH-dominant",
+        "state_mix_hc_dominant": "HC-dominant",
+        "state_mix_ch_dominant": "CH-dominant",
+        "state_mix_cc_dominant": "CC-dominant",
+        "state_mix_one_side_hot": "one-side-hot",
+        "table_ratio_1_to_1": "1:1",
+        "table_ratio_1_to_2": "1:2",
+        "table_ratio_1_to_4": "1:4",
+        "table_ratio_1_to_8": "1:8",
+        "table_ratio_1_to_16": "1:16",
     }
     if text in replacements:
         return replacements[text]
@@ -211,8 +222,33 @@ def _panel_label(ax: plt.Axes, label: str) -> None:
 def _savefig(fig: plt.Figure, name: str) -> None:
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     for ext in ["svg", "png"]:
-        fig.savefig(FIG_DIR / f"{name}.{ext}", bbox_inches="tight")
+        path = FIG_DIR / f"{name}.{ext}"
+        fig.savefig(path, bbox_inches="tight")
+        if ext == "svg":
+            text = path.read_text(encoding="utf-8")
+            path.write_text("\n".join(line.rstrip() for line in text.splitlines()) + "\n", encoding="utf-8")
     plt.close(fig)
+
+
+def _collect_legend_handles(axes: Iterable[plt.Axes]) -> tuple[list[object], list[str]]:
+    handles: list[object] = []
+    labels: list[str] = []
+    seen: set[str] = set()
+    for ax in axes:
+        ax_handles, ax_labels = ax.get_legend_handles_labels()
+        for handle, label in zip(ax_handles, ax_labels):
+            if not label or label.startswith("_") or label in seen:
+                continue
+            seen.add(label)
+            handles.append(handle)
+            labels.append(label)
+    return handles, labels
+
+
+def _bottom_legend(fig: plt.Figure, axes: Iterable[plt.Axes], ncol: int = 4, y: float = 0.01) -> None:
+    handles, labels = _collect_legend_handles(axes)
+    if handles:
+        fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.5, y), ncol=ncol, fontsize=8, frameon=False)
 
 
 def _lineplot(
@@ -535,7 +571,7 @@ def plot_fig5(agg: pd.DataFrame) -> FigureRecord:
         rel=("relative_to_ours", "mean"),
     ).reset_index()
     fig, axes = plt.subplots(2, 2, figsize=(11.8, 7.2))
-    _lineplot(axes[0, 0], by_x, "x_value", "plot_time", methods, "Model-estimated time", "Input scale", logy=True, legend=True)
+    _lineplot(axes[0, 0], by_x, "x_value", "plot_time", methods, "Model-estimated time", "Input scale", logy=True)
     _panel_label(axes[0, 0], "a")
     ratio = by_x[by_x["method_label"] != OURS].groupby("method_label")["rel"].apply(_geomean).reset_index()
     ratio = ratio[ratio["method_label"].isin(methods)].sort_values("rel", ascending=True)
@@ -552,6 +588,8 @@ def plot_fig5(agg: pd.DataFrame) -> FigureRecord:
     _panel_label(axes[1, 0], "c")
     _lineplot(axes[1, 1], by_x, "x_value", "control", methods, "Control-path overhead ratio", "Input scale")
     _panel_label(axes[1, 1], "d")
+    _bottom_legend(fig, axes.flat, ncol=4, y=0.0)
+    fig.subplots_adjust(bottom=0.18, hspace=0.5, wspace=0.34)
     fig.suptitle("Fig. 5. Input-scale behavior under increasing join input", y=1.04, fontsize=12)
     _savefig(fig, "fig5_input_scale_main")
     return FigureRecord("fig5_input_scale_main", "Input-scale behavior", "Ours keeps lower modeled completion time and load dispersion as input scale grows.")
@@ -638,7 +676,7 @@ def plot_fig7(agg: pd.DataFrame) -> FigureRecord:
     ]
     for ax, (x_name, title, lab) in zip(axes.flat, panels):
         g = data[data["x_name"] == x_name].groupby(["x_value", "method_label"], dropna=False)["relative_to_ours"].mean().reset_index()
-        _lineplot(ax, g, "x_value", "relative_to_ours", methods, "Relative time ratio", title, legend=(lab == "a"))
+        _lineplot(ax, g, "x_value", "relative_to_ours", methods, "Relative time ratio", title)
         ax.axhline(1.0, color="#222222", linewidth=1.0, linestyle="--")
         ax.set_title(title)
         _panel_label(ax, lab)
@@ -646,7 +684,8 @@ def plot_fig7(agg: pd.DataFrame) -> FigureRecord:
             ax.tick_params(axis="x", labelrotation=18)
     for ax in axes.flat[len(panels):]:
         ax.set_axis_off()
-    fig.subplots_adjust(hspace=0.5, wspace=0.32)
+    _bottom_legend(fig, axes.flat, ncol=4, y=0.0)
+    fig.subplots_adjust(bottom=0.16, hspace=0.58, wspace=0.32)
     fig.suptitle("Fig. 7. Workload-shape changes preserve the same ranking pattern", y=1.02, fontsize=12)
     _savefig(fig, "fig7_workload_factors")
     return FigureRecord("fig7_workload_factors", "Workload factors", "Ours remains robust across skew, work concentration, record width, state mix, table ratio, and rank correlation.")
@@ -718,7 +757,7 @@ def plot_fig9(agg: pd.DataFrame) -> FigureRecord:
     methods = _method_sort(data["method_label"].unique())
     fig, axes = plt.subplots(2, 3, figsize=(14.5, 7.5))
     case_data = data[data["x_name"] == "mechanism2_case"].groupby(["x_value", "method_label"], dropna=False).mean(numeric_only=True).reset_index()
-    _lineplot(axes[0, 0], case_data, "x_value", "relative_to_ours", methods, "Relative time ratio", "Recognition case", legend=True)
+    _lineplot(axes[0, 0], case_data, "x_value", "relative_to_ours", methods, "Relative time ratio", "Recognition case")
     axes[0, 0].axhline(1.0, color="#222222", linewidth=1.0, linestyle="--")
     axes[0, 0].tick_params(axis="x", labelrotation=10)
     _panel_label(axes[0, 0], "a")
@@ -733,7 +772,7 @@ def plot_fig9(agg: pd.DataFrame) -> FigureRecord:
     axes[0, 1].set_xticklabels([_short_method(m) for m in pr["method_label"]], rotation=20, ha="right")
     axes[0, 1].set_ylim(0, 1.05)
     axes[0, 1].set_ylabel("Hot-key identification quality")
-    axes[0, 1].legend(fontsize=8)
+    axes[0, 1].legend(fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.22), ncol=3)
     axes[0, 1].grid(axis="y", color="#e6e6e6")
     _panel_label(axes[0, 1], "b")
     overhead = data.groupby("method_label", dropna=False)[["candidate_omit_upper_bound", "certified_boundary_omit_upper_bound", "false_certification", "boundary_lookup_time", "boundary_lookup_bytes", "candidate_count"]].mean().reset_index()
@@ -754,7 +793,8 @@ def plot_fig9(agg: pd.DataFrame) -> FigureRecord:
         _lineplot(ax, g, "x_value", "relative_to_ours", methods, "Relative time ratio", title)
         ax.axhline(1.0, color="#222222", linewidth=1.0, linestyle="--")
         _panel_label(ax, lab)
-    fig.subplots_adjust(hspace=0.65, wspace=0.36)
+    _bottom_legend(fig, [axes[0, 0], axes[1, 1], axes[1, 2]], ncol=4, y=0.0)
+    fig.subplots_adjust(bottom=0.2, hspace=0.78, wspace=0.36)
     fig.suptitle("Fig. 9. Boundary-preserving dual-side identification avoids brittle one-sided candidates", y=1.02, fontsize=12)
     _savefig(fig, "fig9_dual_side_recognition")
     return FigureRecord("fig9_dual_side_recognition", "Dual-side recognition", "Mechanism 2 improves current-round load facts by preserving boundary candidates and completing both-side evidence.")
@@ -765,7 +805,7 @@ def plot_fig10(agg: pd.DataFrame) -> FigureRecord:
     methods = _method_sort(data["method_label"].unique())
     fig, axes = plt.subplots(2, 3, figsize=(14.5, 7.2))
     slow = data[data["x_name"] == "slowdown_factor"].groupby(["x_value", "method_label"], dropna=False)[["relative_to_ours", "load_cv", "worker_imbalance_ratio", "max_worker_time"]].mean().reset_index()
-    _lineplot(axes[0, 0], slow, "x_value", "relative_to_ours", methods, "Relative time ratio", "Slow worker factor", legend=True)
+    _lineplot(axes[0, 0], slow, "x_value", "relative_to_ours", methods, "Relative time ratio", "Slow worker factor")
     axes[0, 0].axhline(1.0, color="#222222", linewidth=1.0, linestyle="--")
     _panel_label(axes[0, 0], "a")
     _lineplot(axes[0, 1], slow, "x_value", "load_cv", methods, "Load CV", "Slow worker factor")
@@ -788,10 +828,11 @@ def plot_fig10(agg: pd.DataFrame) -> FigureRecord:
     axes[1, 2].set_xticklabels([_format_value(v) for v in xs])
     axes[1, 2].set_xlabel("Retry budget")
     axes[1, 2].set_ylabel("Probe/CAS count")
-    axes[1, 2].legend(fontsize=8)
+    axes[1, 2].legend(fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.22), ncol=2)
     axes[1, 2].grid(axis="y", color="#e6e6e6")
     _panel_label(axes[1, 2], "f")
-    fig.subplots_adjust(hspace=0.55, wspace=0.34)
+    _bottom_legend(fig, [axes[0, 0], axes[0, 1], axes[0, 2], axes[1, 0], axes[1, 1]], ncol=4, y=0.0)
+    fig.subplots_adjust(bottom=0.2, hspace=0.78, wspace=0.34)
     fig.suptitle("Fig. 10. Runtime rebalancing is most visible under injected long-tail pressure", y=1.02, fontsize=12)
     _savefig(fig, "fig10_runtime_rebalance")
     return FigureRecord("fig10_runtime_rebalance", "Runtime rebalancing", "Mechanism 3 reduces long-tail impact when execution-time remaining work can be safely taken over.")
